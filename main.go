@@ -1,18 +1,18 @@
 package main
 
 import (
+	"github.com/labstack/echo/v4"
 	"goproject/database"
-	"goproject/routes"
-	"log"
 	"net/http"
 )
 
 func main() {
 
 	database.InitDB()
+	e := echo.New()
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+	e.Logger.Fatal(e.Start(":8080"))
 
-	router := routes.RegisterRoutes()
-
-	log.Println("Server is running on localhost:8080")
-	log.Fatal(http.ListenAndServe("localhost:8080", router))
 }
