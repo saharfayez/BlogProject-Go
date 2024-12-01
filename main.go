@@ -1,18 +1,14 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
 	"goproject/database"
-	"net/http"
+	"goproject/route"
 )
 
 func main() {
 
 	database.InitDB()
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	e := routes.RegisterRoutes()
 	e.Logger.Fatal(e.Start(":8080"))
 
 }
