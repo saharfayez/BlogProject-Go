@@ -4,25 +4,23 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
+	"github.com/labstack/echo/v4"
 	"goproject/database"
 	"goproject/models"
 	"goproject/utils"
 	"net/http"
 )
 
-func GetPosts() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		var posts []models.Post
+func GetPosts(c echo.Context) error {
 
-		result := database.DB.Find(&posts)
-		if result.Error != nil {
-			http.Error(w, "Error querying posts", http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(posts)
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	var posts []models.Post
+
+	result := database.DB.Find(&posts)
+	if result.Error != nil {
+		return c.String(http.StatusInternalServerError, "Error querying posts")
 	}
+	return c.JSON(http.StatusOK, posts)
 }
 
 func CreatePost() http.HandlerFunc {
