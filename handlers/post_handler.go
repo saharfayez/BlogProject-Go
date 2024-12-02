@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"errors"
-	"github.com/gorilla/mux"
 	"github.com/labstack/echo/v4"
 	"goproject/database"
 	"goproject/models"
@@ -23,115 +20,106 @@ func GetPosts(c echo.Context) error {
 	return c.JSON(http.StatusOK, posts)
 }
 
-func CreatePost() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+func CreatePost(c echo.Context) error {
 
-		username, err := utils.GetUsernameFromContext(w, r)
-		if err != nil {
-			return
-		}
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	username := utils.GetUsernameFromContext(c)
 
-		var user models.User
-		if err := database.DB.Where("username = ?", username).First(&user).Error; err != nil {
-			http.Error(w, "User not found", http.StatusNotFound)
-			return
-		}
-
-		var post models.Post
-		json.NewDecoder(r.Body).Decode(&post)
-		post.UserID = user.ID
-
-		if err := database.DB.Create(&post).Error; err != nil {
-			http.Error(w, "Error creating post", http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(post)
-	}
-}
-
-func GetPost() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		params := mux.Vars(r)
-		var post models.Post
-		result := database.DB.First(&post, params["id"])
-		if result.Error != nil {
-			http.Error(w, "Error getting post", http.StatusNotFound)
-			return
-		}
-		w.WriteHeader(http.StatusFound)
-		json.NewEncoder(w).Encode(post)
-	}
-}
-func UpdatePost() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		var post models.Post
-		var user models.User
-		user, post, err := authorizePost(w, r)
-		if err != nil {
-			return
-		}
-		var updatedPost models.Post
-		json.NewDecoder(r.Body).Decode(&updatedPost)
-		updatedPost.UserID = user.ID
-		updatedPost.ID = post.ID
-		if err := database.DB.Save(&updatedPost).Error; err != nil {
-			http.Error(w, "Error updating post", http.StatusInternalServerError)
-		}
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(updatedPost)
-
-	}
-}
-
-func DeletePost() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		params := mux.Vars(r)
-		_, _, err := authorizePost(w, r)
-		if err != nil {
-			return
-		}
-
-		var post models.Post
-		result := database.DB.Delete(&post, params["id"])
-		if result.Error != nil {
-			http.Error(w, "Error deleting post", http.StatusNotFound)
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode("Post deleted successfully")
-	}
-
-}
-func authorizePost(w http.ResponseWriter, r *http.Request) (models.User, models.Post, error) {
-
-	params := mux.Vars(r)
-	username, err := utils.GetUsernameFromContext(w, r)
-	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return models.User{}, models.Post{}, errors.New("Unauthorized")
-	}
-	var post models.Post
-	if err := database.DB.First(&post, params["id"]).Error; err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
-		return models.User{}, models.Post{}, errors.New("Post not found")
-	}
 	var user models.User
-	err = database.DB.Where("username = ?", username).First(&user).Error
+	if err := database.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		return c.String(http.StatusNotFound, "User not found")
+	}
+
+	var post models.Post
+	if err := c.Bind(&post); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	post.UserID = user.ID
+
+	if err := database.DB.Create(&post).Error; err != nil {
+		return c.String(http.StatusInternalServerError, "Error creating post")
+	}
+	return c.JSON(http.StatusCreated, post)
+}
+
+func GetPost(c echo.Context) error {
+
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	id := c.Param("id")
+	var post models.Post
+	result := database.DB.First(&post, id)
+	if result.Error != nil {
+		return c.String(http.StatusNotFound, "Error getting post")
+	}
+	return c.JSON(http.StatusFound, post)
+}
+func UpdatePost(c echo.Context) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	// Attempt authorization
+	var user models.User
+	var post models.Post
+	user, post, err := authorizePost(c)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return models.User{}, models.Post{}, errors.New("User not found")
+		return err
+	}
+
+	// Bind the incoming data to a new Post object
+	var updatedPost models.Post
+	if err := c.Bind(&updatedPost); err != nil {
+		return c.String(http.StatusBadRequest, "Error parsing body")
+	}
+
+	// Ensure the updated post retains correct UserID and ID
+	updatedPost.UserID = user.ID
+	updatedPost.ID = post.ID
+
+	// Attempt to save the updated post to the database
+	if err := database.DB.Save(&updatedPost).Error; err != nil {
+		c.Logger().Error(err)
+		return c.String(http.StatusInternalServerError, "Error updating post")
+	}
+
+	// Successfully updated
+	return c.JSON(http.StatusOK, updatedPost)
+}
+
+func DeletePost(c echo.Context) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	id := c.Param("id")
+	_, _, err := authorizePost(c)
+	if err != nil {
+		return err
+	}
+
+	var post models.Post
+	result := database.DB.Delete(&post, id)
+	if result.Error != nil {
+		return c.String(http.StatusNotFound, "Error deleting post")
+	}
+	return c.String(http.StatusOK, "Post deleted successfully")
+}
+
+func authorizePost(c echo.Context) (models.User, models.Post, error) {
+	username := utils.GetUsernameFromContext(c)
+	id := c.Param("id")
+
+	var post models.Post
+	if err := database.DB.First(&post, id).Error; err != nil {
+		c.Logger().Error(err)
+		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusNotFound, "Post not found")
+	}
+
+	var user models.User
+	err := database.DB.Where("username = ?", username).First(&user).Error
+	if err != nil {
+		c.Logger().Error(err)
+		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusNotFound, "User not found")
 	}
 
 	if post.UserID != user.ID {
-		http.Error(w, "User not allowed to update or delete this post", http.StatusUnauthorized)
-		return models.User{}, models.Post{}, errors.New("Forbidden")
+		c.Logger().Error("User not authorized to update or delete this post")
+		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusUnauthorized, "User not authorized to update or delete this post")
 	}
 
 	return user, post, nil

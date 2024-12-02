@@ -1,18 +1,21 @@
 package utils
 
 import (
-	"errors"
-	"fmt"
 	"github.com/golang-jwt/jwt/v5"
-	"net/http"
+	"github.com/labstack/echo/v4"
 	"time"
 )
 
-var jwtSecret = []byte("your_secret_key")
+var JwtSecret = []byte("your_secret_key")
 
 type Claims struct {
 	Username string `json:"username"`
 	jwt.RegisteredClaims
+}
+
+func (c Claims) Valid() error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func GenerateJWT(username string) (string, error) {
@@ -25,34 +28,12 @@ func GenerateJWT(username string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtSecret)
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
+	return token.SignedString(JwtSecret)
 }
 
-func VerifyJWT(tokenString string) (*Claims, error) {
-	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtSecret, nil
-	})
-
-	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-
-	return claims, nil
-}
-
-func GetUsernameFromContext(w http.ResponseWriter, r *http.Request) (string, error) {
-	username, ok := r.Context().Value("username").(string)
-
-	if username == "" || !ok {
-		http.Error(w, "User not authenticated", http.StatusUnauthorized)
-		return "", errors.New("User not authenticated")
-	}
-	fmt.Println(username)
-	return username, nil
-
+func GetUsernameFromContext(c echo.Context) string {
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(*Claims)
+	username := claims.Username
+	return username
 }
