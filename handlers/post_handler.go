@@ -56,7 +56,6 @@ func GetPost(c echo.Context) error {
 func UpdatePost(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-	// Attempt authorization
 	var user models.User
 	var post models.Post
 	user, post, err := authorizePost(c)
@@ -70,17 +69,14 @@ func UpdatePost(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error parsing body")
 	}
 
-	// Ensure the updated post retains correct UserID and ID
 	updatedPost.UserID = user.ID
 	updatedPost.ID = post.ID
 
-	// Attempt to save the updated post to the database
 	if err := database.DB.Save(&updatedPost).Error; err != nil {
 		c.Logger().Error(err)
 		return c.String(http.StatusInternalServerError, "Error updating post")
 	}
 
-	// Successfully updated
 	return c.JSON(http.StatusOK, updatedPost)
 }
 

@@ -14,7 +14,6 @@ func RegisterRoutes() *echo.Echo {
 	e.POST("/login", handlers.Login)
 
 	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
 
 	protected := e.Group("/api", middlewares.JWTMiddleware())
 
