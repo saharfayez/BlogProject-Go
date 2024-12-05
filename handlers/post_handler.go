@@ -63,7 +63,6 @@ func UpdatePost(c echo.Context) error {
 		return err
 	}
 
-	// Bind the incoming data to a new Post object
 	var updatedPost models.Post
 	if err := c.Bind(&updatedPost); err != nil {
 		return c.String(http.StatusBadRequest, "Error parsing body")
