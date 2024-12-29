@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 	"goproject/database"
@@ -78,5 +79,8 @@ func Login(c echo.Context) error {
 	}
 	var loginResponse response.LoginResponse
 	loginResponse.Token = token
+	var users []models.User
+	database.DB.Preload("Posts").Find(&users)
+	fmt.Println(users)
 	return c.JSON(http.StatusOK, loginResponse)
 }

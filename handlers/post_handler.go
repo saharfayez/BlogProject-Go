@@ -39,7 +39,7 @@ func CreatePost(c echo.Context) error {
 	if err := database.DB.Create(&post).Error; err != nil {
 		return c.String(http.StatusInternalServerError, "Error creating post")
 	}
-	return c.JSON(http.StatusCreated, post)
+	return c.String(http.StatusCreated, "post created successfully")
 }
 
 func GetPost(c echo.Context) error {
@@ -92,7 +92,7 @@ func DeletePost(c echo.Context) error {
 	if result.Error != nil {
 		return c.String(http.StatusNotFound, "Error deleting post")
 	}
-	return c.String(http.StatusOK, "Post deleted successfully")
+	return c.String(http.StatusOK, "post deleted successfully")
 }
 
 func authorizePost(c echo.Context) (models.User, models.Post, error) {
