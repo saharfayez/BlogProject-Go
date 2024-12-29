@@ -6,27 +6,22 @@ import (
 	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
-	"goproject/models"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"testing"
 )
 
 var (
-	response      *http.Response
-	responseBody  []byte
-	loggedInUser  models.User
-	authToken     string
-	baseURL       = "http://localhost:8080"
-	postTitle     string
-	postContent   string
-	createdPostID uint
+	response     *http.Response
+	responseBody []byte
+	authToken    string
+	baseURL      = "http://localhost:8080"
 )
 
 func aUserIsLoggedInWithUsernameAndPassword(username, password string) error {
-	loggedInUser = models.User{Username: username, Password: password}
 
-	// Sign up user if they don't exist
-	// Log in the user
 	loginPayload := map[string]string{
 		"username": username,
 		"password": password,
@@ -45,8 +40,6 @@ func aUserIsLoggedInWithUsernameAndPassword(username, password string) error {
 }
 
 func theUserSendsAPOSTRequestToWithTitleAndContent(api, title, content string) error {
-	postTitle = title
-	postContent = content
 
 	postPayload := map[string]string{
 		"title":   title,
@@ -60,7 +53,7 @@ func theUserSendsAPOSTRequestToWithTitleAndContent(api, title, content string) e
 
 	client := &http.Client{}
 	response, _ = client.Do(req)
-	responseBody, _ = ioutil.ReadAll(response.Body)
+	responseBody, _ = io.ReadAll(response.Body)
 	return nil
 }
 
@@ -72,7 +65,6 @@ func theResponseStatusShouldBe(expectedStatus int) error {
 }
 
 func theResponseBodyShouldBe(expectedMessage string) error {
-	fmt.Println(responseBody)
 	assert.Equal(nil, expectedMessage, string(responseBody), fmt.Sprintf("Expected message %s but got %s", expectedMessage, response.Body))
 	return nil
 }
@@ -83,4 +75,18 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the response status should be (\d+)$`, theResponseStatusShouldBe)
 	ctx.Step(`^the response body should be "([^"]*)"$`, theResponseBodyShouldBe)
 
+}
+
+func TestFeatures(t *testing.T) {
+	opts := godog.Options{
+		Output: os.Stdout,
+		Format: "pretty", // or "progress" for a more compact output
+		Paths:  []string{"features"},
+	}
+	godog.TestSuite{
+		Name:                 "godogs",
+		TestSuiteInitializer: nil,
+		ScenarioInitializer:  InitializeScenario,
+		Options:              &opts,
+	}.Run()
 }
