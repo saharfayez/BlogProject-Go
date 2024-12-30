@@ -23,7 +23,7 @@ func GetPosts(c echo.Context) error {
 func CreatePost(c echo.Context) error {
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	username := utils.GetUsernameFromContext(c)
+	username := utils.GetTokenFromContext(c)
 
 	var user models.User
 	if err := database.DB.Where("username = ?", username).First(&user).Error; err != nil {
@@ -39,7 +39,7 @@ func CreatePost(c echo.Context) error {
 	if err := database.DB.Create(&post).Error; err != nil {
 		return c.String(http.StatusInternalServerError, "Error creating post")
 	}
-	return c.String(http.StatusCreated, "post created successfully")
+	return c.JSON(http.StatusCreated, post)
 }
 
 func GetPost(c echo.Context) error {
@@ -96,7 +96,7 @@ func DeletePost(c echo.Context) error {
 }
 
 func authorizePost(c echo.Context) (models.User, models.Post, error) {
-	username := utils.GetUsernameFromContext(c)
+	username := utils.GetTokenFromContext(c)
 	id := c.Param("id")
 
 	var post models.Post

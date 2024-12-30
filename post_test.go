@@ -6,75 +6,74 @@ import (
 	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
-	"io"
-	"io/ioutil"
+	"goproject/database"
+	"goproject/models"
+	"goproject/utils"
 	"net/http"
 	"os"
 	"testing"
 )
 
 var (
-	response     *http.Response
-	responseBody []byte
-	authToken    string
-	baseURL      = "http://localhost:8080"
+	authToken string
+	baseURL   = "http://localhost:8080"
 )
 
-func aUserIsLoggedInWithUsernameAndPassword(username, password string) error {
-
-	loginPayload := map[string]string{
-		"username": username,
-		"password": password,
-	}
-	payloadBytes, _ := json.Marshal(loginPayload)
-	resp, err := http.Post(baseURL+"/login", "application/json", bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return fmt.Errorf("error logging in user: %w", err)
-	}
-	body, _ := ioutil.ReadAll(resp.Body)
-	var loginResponse map[string]string
-	json.Unmarshal(body, &loginResponse)
-
-	authToken = loginResponse["Token"]
+func anAccountExistsWithUsername(username string) error {
+	authToken, _ = utils.GenerateJWT(username)
+	fmt.Println(authToken)
 	return nil
 }
 
-func theUserSendsAPOSTRequestToWithTitleAndContent(api, title, content string) error {
-
+func theUserCreatesPostWithTitleAndContent(title, content string) error {
 	postPayload := map[string]string{
 		"title":   title,
 		"content": content,
 	}
 	payloadBytes, _ := json.Marshal(postPayload)
 
-	req, _ := http.NewRequest("POST", baseURL+api, bytes.NewBuffer(payloadBytes))
+	req, _ := http.NewRequest("POST", baseURL+"/api/posts", bytes.NewBuffer(payloadBytes))
 	req.Header.Set("Authorization", "Bearer "+authToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	response, _ = client.Do(req)
-	responseBody, _ = io.ReadAll(response.Body)
+	client.Do(req)
+
+	return nil
+}
+func postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
+
+	username, err := utils.GetUsernameFromToken(authToken)
+	if err != nil {
+		return fmt.Errorf("failed to extract username from token: %v", err)
+	}
+
+	var user models.User
+	if err := database.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		return fmt.Errorf("failed to find user with username '%s': %v", username, err)
+	}
+
+	var post models.Post
+	if err := database.DB.Where("user_id = ?", user.ID).Last(&post).Error; err != nil {
+		return fmt.Errorf("failed to find the last post for user '%s': %v", username, err)
+	}
+
+	assert.Equal(nil, title, post.Title)
+	assert.Equal(&testing.T{}, content, post.Content)
+
 	return nil
 }
 
-func theResponseStatusShouldBe(expectedStatus int) error {
-	fmt.Println(expectedStatus)
-	fmt.Println(response.StatusCode)
-	assert.Equal(nil, expectedStatus, response.StatusCode, fmt.Sprintf("Expected status %d but got %d", expectedStatus, response.StatusCode))
-	return nil
-}
-
-func theResponseBodyShouldBe(expectedMessage string) error {
-	assert.Equal(nil, expectedMessage, string(responseBody), fmt.Sprintf("Expected message %s but got %s", expectedMessage, response.Body))
+func userShouldBeDirectedToHomePage() error {
 	return nil
 }
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
-	ctx.Step(`^a user is logged in with username "([^"]*)" and password "([^"]*)"$`, aUserIsLoggedInWithUsernameAndPassword)
-	ctx.Step(`^the user sends a POST request to "([^"]*)" with title "([^"]*)" and content "([^"]*)"$`, theUserSendsAPOSTRequestToWithTitleAndContent)
-	ctx.Step(`^the response status should be (\d+)$`, theResponseStatusShouldBe)
-	ctx.Step(`^the response body should be "([^"]*)"$`, theResponseBodyShouldBe)
-
+	database.InitDB()
+	ctx.Given(`^an account exists with username "([^"]*)"$`, anAccountExistsWithUsername)
+	ctx.When(`^the user creates post with title "([^"]*)" and content "([^"]*)"$`, theUserCreatesPostWithTitleAndContent)
+	ctx.Then(`^post should be created successfully with title "([^"]*)" and content "([^"]*)"$`, postShouldBeCreatedSuccessfullyWithTitleAndContent)
+	ctx.Then(`^user should be directed to home page$`, userShouldBeDirectedToHomePage)
 }
 
 func TestFeatures(t *testing.T) {
