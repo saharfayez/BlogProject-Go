@@ -65,7 +65,7 @@ func postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) e
 	return nil
 }
 
-func userShouldBeDirectedToHomePage() {
+func userShouldBeReDirectedToHomePage() {
 }
 
 //func userShouldBeDirectedToLandingPage() error {
@@ -87,7 +87,7 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Given(`^user is logged in with username "([^"]*)"$`, userIsLoggedInWithUsername)
 	ctx.When(`^the user creates a post with title "([^"]*)" and content "([^"]*)"$`, theUserCreatesPostWithTitleAndContent)
 	ctx.Then(`^post should be created successfully with title "([^"]*)" and content "([^"]*)"$`, postShouldBeCreatedSuccessfullyWithTitleAndContent)
-	ctx.Then(`^user should be redirected to home page$`, userShouldBeDirectedToHomePage)
+	ctx.Then(`^user should be redirected to home page$`, userShouldBeReDirectedToHomePage)
 	//ctx.Step(`^user should be directed to landing page$`, userShouldBeDirectedToLandingPage)
 }
 
