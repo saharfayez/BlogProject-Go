@@ -22,7 +22,3 @@ Feature: Post Management
 #    Examples:
 #      | title         | content         |
 #      | "My First Post" | "This is my post" |
-
-
-
-
