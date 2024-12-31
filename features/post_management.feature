@@ -1,5 +1,6 @@
 Feature: Post Management
   To manage posts, a user should be able to create and delete posts.
+
   Background:
     Given an account exists with username "sahar"
     And user is logged in with username "sahar"
@@ -10,7 +11,7 @@ Feature: Post Management
     And user should be redirected to home page
 
     Examples:
-      | title         | content         |
+      | title           | content           |
       | "My First Post" | "This is my post" |
 
 #  @Create

@@ -47,8 +47,8 @@ func theUserCreatesPostWithTitleAndContent(title, content string) error {
 
 	return nil
 }
-func postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
 
+func postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
 	var user models.User
 	if err := database.DB.Where("username = ?", userName).First(&user).Error; err != nil {
 		return fmt.Errorf("failed to find user with username '%s': %v", userName, err)
@@ -74,8 +74,14 @@ func userShouldBeReDirectedToHomePage() {
 
 //var godogTags string // Variable to hold tags
 
-func init() {
-	//flag.StringVar(&godogTags, "godog.tags", "", "Tags to filter scenarios")
+//func init() {
+//	flag.StringVar(&godogTags, "godog.tags", "", "Tags to filter scenarios")
+//}
+
+func InitializeTestSuite(context *godog.TestSuiteContext) {
+	context.BeforeSuite(func() {
+		database.InitDB()
+	})
 }
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
@@ -106,10 +112,4 @@ func TestFeature(t *testing.T) {
 		ScenarioInitializer:  InitializeScenario,
 		Options:              &opts,
 	}.Run()
-}
-
-func InitializeTestSuite(context *godog.TestSuiteContext) {
-	context.BeforeSuite(func() {
-		database.InitDB()
-	})
 }
