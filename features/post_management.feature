@@ -1,18 +1,15 @@
 Feature: Post Management
-  To manage posts, a user should be able to create and delete posts.
+  To manage posts, a user should be able to create posts.
 
   Background:
     Given an account exists with username "sahar"
     And user is logged in with username "sahar"
 
-  Scenario Outline: Create a post successfully
-    When the user creates a post with title <title> and content <content>
-    Then post should be created successfully with title <title> and content <content>
+  Scenario: Create a post successfully
+    When the user creates a post with title "My First Post" and content "This is my post"
+    Then post should be created successfully with title "My First Post" and content "This is my post"
     And user should be redirected to home page
 
-    Examples:
-      | title           | content           |
-      | "My First Post" | "This is my post" |
 
 #  @Create
 #  Scenario Outline: temp

@@ -15,23 +15,24 @@ import (
 	"testing"
 )
 
-var (
+var baseURL = "http://localhost:8080"
+
+type ScenarioState struct {
 	authToken string
-	baseURL   = "http://localhost:8080"
 	userName  string
-)
+}
 
-func anAccountExistsWithUsername(username string) error {
+func (state *ScenarioState) anAccountExistsWithUsername(username string) error {
 	return nil
 }
 
-func userIsLoggedInWithUsername(username string) error {
-	authToken, _ = utils.GenerateJWT(username)
-	userName = username
+func (state *ScenarioState) userIsLoggedInWithUsername(username string) error {
+	state.authToken, _ = utils.GenerateJWT(username)
+	state.userName = username
 	return nil
 }
 
-func theUserCreatesPostWithTitleAndContent(title, content string) error {
+func (state *ScenarioState) theUserCreatesPostWithTitleAndContent(title, content string) error {
 	postPayload := map[string]string{
 		"title":   title,
 		"content": content,
@@ -39,7 +40,7 @@ func theUserCreatesPostWithTitleAndContent(title, content string) error {
 	payloadBytes, _ := json.Marshal(postPayload)
 
 	req, _ := http.NewRequest("POST", baseURL+"/api/posts", bytes.NewBuffer(payloadBytes))
-	req.Header.Set("Authorization", "Bearer "+authToken)
+	req.Header.Set("Authorization", "Bearer "+state.authToken)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -48,24 +49,25 @@ func theUserCreatesPostWithTitleAndContent(title, content string) error {
 	return nil
 }
 
-func postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
+func (state *ScenarioState) postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
 	var user models.User
-	if err := database.DB.Where("username = ?", userName).First(&user).Error; err != nil {
-		return fmt.Errorf("failed to find user with username '%s': %v", userName, err)
+	if err := database.DB.Where("username = ?", state.userName).First(&user).Error; err != nil {
+		return fmt.Errorf("failed to find user with username '%s': %v", state.userName, err)
 	}
 
 	var post models.Post
 	if err := database.DB.Where("user_id = ?", user.ID).Last(&post).Error; err != nil {
-		return fmt.Errorf("failed to find the last post for user '%s': %v", userName, err)
+		return fmt.Errorf("failed to find the last post for user '%s': %v", state.userName, err)
 	}
 
 	assert.Equal(nil, title, post.Title)
-	assert.Equal(&testing.T{}, content, post.Content)
+	assert.Equal(nil, content, post.Content)
 
 	return nil
 }
 
-func userShouldBeReDirectedToHomePage() {
+func (state *ScenarioState) userShouldBeReDirectedToHomePage() error {
+	return nil
 }
 
 //func userShouldBeDirectedToLandingPage() error {
@@ -85,15 +87,18 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 }
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
+	state := &ScenarioState{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		fmt.Println("Before each scenario")
+		*state = ScenarioState{}
 		return ctx, nil
 	})
-	ctx.Given(`^an account exists with username "([^"]*)"$`, anAccountExistsWithUsername)
-	ctx.Given(`^user is logged in with username "([^"]*)"$`, userIsLoggedInWithUsername)
-	ctx.When(`^the user creates a post with title "([^"]*)" and content "([^"]*)"$`, theUserCreatesPostWithTitleAndContent)
-	ctx.Then(`^post should be created successfully with title "([^"]*)" and content "([^"]*)"$`, postShouldBeCreatedSuccessfullyWithTitleAndContent)
-	ctx.Then(`^user should be redirected to home page$`, userShouldBeReDirectedToHomePage)
+
+	ctx.Given(`^an account exists with username "([^"]*)"$`, state.anAccountExistsWithUsername)
+	ctx.Given(`^user is logged in with username "([^"]*)"$`, state.userIsLoggedInWithUsername)
+	ctx.When(`^the user creates a post with title "([^"]*)" and content "([^"]*)"$`, state.theUserCreatesPostWithTitleAndContent)
+	ctx.Then(`^post should be created successfully with title "([^"]*)" and content "([^"]*)"$`, state.postShouldBeCreatedSuccessfullyWithTitleAndContent)
+	ctx.Then(`^user should be redirected to home page$`, state.userShouldBeReDirectedToHomePage)
 	//ctx.Step(`^user should be directed to landing page$`, userShouldBeDirectedToLandingPage)
 }
 
