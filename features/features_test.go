@@ -1,6 +1,7 @@
 package features
 
 import (
+	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/go-testfixtures/testfixtures/v3"
 	"goproject/database"
@@ -46,6 +47,7 @@ func LoadFixtures(files ...string) error {
 
 func InitializeTestSuite(context *godog.TestSuiteContext) {
 	context.BeforeSuite(func() {
+		fmt.Println("Before Suite")
 		database.InitDB()
 	})
 }
