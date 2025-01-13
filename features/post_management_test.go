@@ -86,10 +86,10 @@ func (state *ScenarioState) userShouldBeReDirectedToHomePage() error {
 func InitializePostManagementScenario(ctx *godog.ScenarioContext) {
 	state := &ScenarioState{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
-		//fmt.Println("Before each scenario")
+		fmt.Println("Before each scenario")
 		*state = ScenarioState{}
 		if sc.Uri == "post_management.feature" && sc.Name == "Create a post successfully" {
-			if err := LoadFixtures("create_post_successfully.yml"); err != nil {
+			if err := LoadFixtures("../fixtures/create_post_successfully.yml"); err != nil {
 				return ctx, fmt.Errorf("failed to load fixtures: %v", err)
 			}
 		}

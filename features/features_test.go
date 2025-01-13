@@ -31,11 +31,10 @@ func TestFeatures(t *testing.T) {
 }
 
 func LoadFixtures(files ...string) error {
-	con, _ := database.DB.DB()
+	db, _ := database.DB.DB()
 	fixtures, err := testfixtures.New(
-		testfixtures.Database(con), // Use the underlying *sql.DB
+		testfixtures.Database(db),
 		testfixtures.Dialect("mysql"),
-		//testfixtures.Paths(files...), // Path to your fixture files
 		testfixtures.DangerousSkipTestDatabaseCheck(),
 		testfixtures.FilesMultiTables(files...),
 	)
