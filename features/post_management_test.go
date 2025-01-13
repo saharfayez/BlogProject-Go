@@ -11,8 +11,6 @@ import (
 	"goproject/models"
 	"goproject/utils"
 	"net/http"
-	"os"
-	"testing"
 )
 
 var baseURL = "http://localhost:8080"
@@ -94,32 +92,17 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	state := &ScenarioState{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
-		fmt.Println("Before each scenario")
+		//fmt.Println("Before each scenario")
 		*state = ScenarioState{}
+		if err := LoadFixtures("create_post_successfully.yml"); err != nil {
+			return ctx, fmt.Errorf("failed to load fixtures: %v", err)
+		}
 		return ctx, nil
 	})
-
 	ctx.Given(`^an account exists with username "([^"]*)"$`, state.anAccountExistsWithUsername)
 	ctx.Given(`^user is logged in with username "([^"]*)"$`, state.userIsLoggedInWithUsername)
 	ctx.When(`^the user creates a post with title "([^"]*)" and content "([^"]*)"$`, state.theUserCreatesPostWithTitleAndContent)
 	ctx.Then(`^post should be created successfully with title "([^"]*)" and content "([^"]*)"$`, state.postShouldBeCreatedSuccessfullyWithTitleAndContent)
 	ctx.Then(`^user should be redirected to home page$`, state.userShouldBeReDirectedToHomePage)
 	//ctx.Step(`^user should be directed to landing page$`, userShouldBeDirectedToLandingPage)
-}
-
-func TestFeature(t *testing.T) {
-	//flag.Parse()
-	opts := godog.Options{
-		Output: os.Stdout,
-		Format: "pretty", // or "progress" for a more compact output
-		Paths:  []string{"."},
-		//Tags:     godogTags, // use parsed tags
-		TestingT: t, // Integrate with go test
-	}
-	godog.TestSuite{
-		Name:                 "posts",
-		TestSuiteInitializer: InitializeTestSuite,
-		ScenarioInitializer:  InitializeScenario,
-		Options:              &opts,
-	}.Run()
 }
