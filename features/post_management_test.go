@@ -18,8 +18,9 @@ import (
 var baseURL = "http://localhost:8080"
 
 type ScenarioState struct {
-	authToken string
-	userName  string
+	authToken  string
+	userName   string
+	statusCode int
 }
 
 func (state *ScenarioState) anAccountExistsWithUsername(username string) error {
@@ -44,8 +45,11 @@ func (state *ScenarioState) theUserCreatesPostWithTitleAndContent(title, content
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	client.Do(req)
-
+	response, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	state.statusCode = response.StatusCode
 	return nil
 }
 
@@ -62,6 +66,7 @@ func (state *ScenarioState) postShouldBeCreatedSuccessfullyWithTitleAndContent(t
 
 	assert.Equal(nil, title, post.Title)
 	assert.Equal(nil, content, post.Content)
+	assert.Equal(nil, state.statusCode, 201)
 
 	return nil
 }

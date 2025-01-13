@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"goproject/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -22,6 +21,8 @@ func InitDB() (*gorm.DB, error) {
 	DB = db
 	db.AutoMigrate(&models.User{}, &models.Post{})
 
-	fmt.Println("Database migration completed")
+	if err != nil {
+		log.Fatal(err)
+	}
 	return db, nil
 }
