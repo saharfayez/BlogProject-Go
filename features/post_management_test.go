@@ -86,6 +86,7 @@ func (state *ScenarioState) userShouldBeReDirectedToHomePage() error {
 func InitializePostManagementScenario(ctx *godog.ScenarioContext) {
 	state := &ScenarioState{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
+		fmt.Println("Before each scenario")
 		*state = ScenarioState{}
 		if sc.Uri == "post_management.feature" && sc.Name == "Create a post successfully" {
 			if err := LoadFixtures("../fixtures/create_post_successfully.yml"); err != nil {
@@ -94,7 +95,6 @@ func InitializePostManagementScenario(ctx *godog.ScenarioContext) {
 		}
 		return ctx, nil
 	})
-
 	ctx.Given(`^an account exists with username "([^"]*)"$`, state.anAccountExistsWithUsername)
 	ctx.Given(`^user is logged in with username "([^"]*)"$`, state.userIsLoggedInWithUsername)
 	ctx.When(`^the user creates a post with title "([^"]*)" and content "([^"]*)"$`, state.theUserCreatesPostWithTitleAndContent)
