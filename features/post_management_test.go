@@ -89,7 +89,7 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 	})
 }
 
-func InitializeScenario(ctx *godog.ScenarioContext) {
+func InitializePostManagementScenario(ctx *godog.ScenarioContext) {
 	state := &ScenarioState{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		//fmt.Println("Before each scenario")

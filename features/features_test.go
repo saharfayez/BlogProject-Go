@@ -9,7 +9,11 @@ import (
 	"testing"
 )
 
-func TestFeature(t *testing.T) {
+func InitializeScenarios(ctx *godog.ScenarioContext) {
+	InitializePostManagementScenario(ctx)
+}
+
+func TestFeatures(t *testing.T) {
 	//flag.Parse()
 	opts := godog.Options{
 		Output: os.Stdout,
@@ -21,7 +25,7 @@ func TestFeature(t *testing.T) {
 	godog.TestSuite{
 		Name:                 "posts",
 		TestSuiteInitializer: InitializeTestSuite,
-		ScenarioInitializer:  InitializeScenario,
+		ScenarioInitializer:  InitializeScenarios,
 		Options:              &opts,
 	}.Run()
 }
