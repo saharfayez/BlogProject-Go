@@ -44,3 +44,9 @@ func LoadFixtures(files ...string) error {
 	}
 	return fixtures.Load()
 }
+
+func InitializeTestSuite(context *godog.TestSuiteContext) {
+	context.BeforeSuite(func() {
+		database.InitDB()
+	})
+}
