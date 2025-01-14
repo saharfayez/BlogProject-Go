@@ -31,7 +31,10 @@ func TestFeatures(t *testing.T) {
 }
 
 func LoadFixtures(files ...string) error {
-	db, _ := database.DB.DB()
+	db, err := database.DB.DB()
+	if err != nil {
+		return err
+	}
 	fixtures, err := testfixtures.New(
 		testfixtures.Database(db),
 		testfixtures.Dialect("mysql"),
