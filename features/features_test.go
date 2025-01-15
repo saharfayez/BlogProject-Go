@@ -1,16 +1,36 @@
 package features
 
 import (
+	"context"
+	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/go-testfixtures/testfixtures/v3"
 	"goproject/database"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
 func InitializeScenarios(ctx *godog.ScenarioContext) {
-	InitializePostManagementScenario(ctx)
+	state := ScenarioState{
+		data: make(map[string]interface{}),
+	}
+	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
+
+		state = ScenarioState{
+			data: make(map[string]interface{}),
+		}
+		fmt.Println("Before each scenario")
+		seedTags := extractSeedTags(sc)
+		for _, tag := range seedTags {
+			if err := LoadFixtures("../fixtures/" + tag + ".yml"); err != nil {
+				return ctx, fmt.Errorf("failed to load fixtures: %v", err)
+			}
+		}
+		return ctx, nil
+	})
+	InitializePostManagementScenario(ctx, &state)
 }
 
 func TestFeatures(t *testing.T) {
@@ -51,4 +71,16 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 	context.BeforeSuite(func() {
 		database.InitDB()
 	})
+}
+
+func extractSeedTags(sc *godog.Scenario) []string {
+	tags := []string{}
+	for _, tag := range sc.Tags {
+		if strings.HasSuffix(tag.Name, "_seed") {
+			seedTag := strings.TrimSuffix(tag.Name, "_seed")
+			seedTag = strings.TrimPrefix(seedTag, "@")
+			tags = append(tags, seedTag)
+		}
+	}
+	return tags
 }
