@@ -6,6 +6,7 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/go-testfixtures/testfixtures/v3"
 	"goproject/database"
+	"goproject/server"
 	"log"
 	"os"
 	"strings"
@@ -57,7 +58,7 @@ func LoadFixtures(files ...string) error {
 	}
 	fixtures, err := testfixtures.New(
 		testfixtures.Database(db),
-		testfixtures.Dialect("mysql"),
+		testfixtures.Dialect(database.DB.Dialector.Name()),
 		testfixtures.DangerousSkipTestDatabaseCheck(),
 		testfixtures.FilesMultiTables(files...),
 	)
@@ -70,6 +71,7 @@ func LoadFixtures(files ...string) error {
 func InitializeTestSuite(context *godog.TestSuiteContext) {
 	context.BeforeSuite(func() {
 		database.InitDB()
+		go server.Serve()
 	})
 }
 

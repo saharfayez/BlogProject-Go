@@ -49,7 +49,6 @@ func (state *ScenarioState) theUserCreatesPostWithTitleAndContent(title, content
 	state.data["statusCode"] = response.StatusCode
 	return nil
 }
-
 func (state *ScenarioState) postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
 	var user models.User
 	username := state.data["username"].(string)

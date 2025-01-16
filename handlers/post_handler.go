@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"goproject/database"
 	"goproject/models"
@@ -21,8 +22,8 @@ func GetPosts(c echo.Context) error {
 }
 
 func CreatePost(c echo.Context) error {
-
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
 	username := utils.GetTokenFromContext(c)
 
 	var user models.User
@@ -30,15 +31,21 @@ func CreatePost(c echo.Context) error {
 		return c.String(http.StatusNotFound, "User not found")
 	}
 
+	// Bind the post data
 	var post models.Post
 	if err := c.Bind(&post); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
+
+	// Set the UserID for the post
 	post.UserID = user.ID
 
+	// Create the post
 	if err := database.DB.Create(&post).Error; err != nil {
+		fmt.Println("Error creating post:", err)
 		return c.String(http.StatusInternalServerError, "Error creating post")
 	}
+
 	return c.JSON(http.StatusCreated, post)
 }
 
