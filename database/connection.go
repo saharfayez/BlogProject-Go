@@ -1,28 +1,33 @@
 package database
 
 import (
+	"github.com/glebarez/sqlite"
 	"goproject/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"os"
 )
 
 var DB *gorm.DB
 
 func InitDB() (*gorm.DB, error) {
 	var err error
-	dsn := "abstract-programmer:example-password@tcp(127.0.0.1:3306)/BlogManager"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
+	DB, err = gorm.Open(getDB(), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Error connecting to the database: ", err)
 	}
 
-	DB = db
-	db.AutoMigrate(&models.User{}, &models.Post{})
+	DB.AutoMigrate(&models.User{}, &models.Post{})
+	return DB, nil
+}
 
-	if err != nil {
-		log.Fatal(err)
+func getDB() gorm.Dialector {
+
+	if v, ok := os.LookupEnv("MYSQL_DSN"); ok {
+		return mysql.Open(v)
 	}
-	return db, nil
+
+	return sqlite.Open(":memory:")
 }

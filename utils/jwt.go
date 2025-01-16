@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"time"
@@ -36,24 +35,4 @@ func GetTokenFromContext(c echo.Context) string {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(*Claims)
 	return claims.Username
-}
-
-func GetUsernameFromToken(tokenString string) (string, error) {
-
-	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return JwtSecret, nil
-	})
-
-	if err != nil {
-		return "", fmt.Errorf("failed to parse token: %v", err)
-	}
-	if !token.Valid {
-		return "", fmt.Errorf("invalid token")
-	}
-
-	return claims.Username, nil
 }
