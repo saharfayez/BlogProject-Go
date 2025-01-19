@@ -38,7 +38,7 @@ func InitializeScenarios(ctx *godog.ScenarioContext) {
 		databaseSetups := extractDatabaseSetups(sc)
 
 		fmt.Println("Before each scenario")
-		for _, databaseSetup := range databaseSetups {
+		for _, databaseSetup := range *databaseSetups {
 			if err := loadFixtures(databaseSetup.operation, "../fixtures/"+databaseSetup.fileName+".yml"); err != nil {
 				return ctx, fmt.Errorf("failed to load fixtures: %v", err)
 			}
@@ -48,7 +48,7 @@ func InitializeScenarios(ctx *godog.ScenarioContext) {
 	InitializePostManagementScenario(ctx, &state)
 }
 
-func extractDatabaseSetups(sc *godog.Scenario) []DatabaseSetup {
+func extractDatabaseSetups(sc *godog.Scenario) *[]DatabaseSetup {
 	var setups []DatabaseSetup
 	for _, tag := range sc.Tags {
 		var setup DatabaseSetup
@@ -69,7 +69,7 @@ func extractDatabaseSetups(sc *godog.Scenario) []DatabaseSetup {
 
 		}
 	}
-	return setups
+	return &setups
 }
 
 func loadFixtures(operation DatabaseOperation, files ...string) error {
