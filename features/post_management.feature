@@ -5,12 +5,12 @@ Feature: Post Management
     Given an account exists with username "sahar"
     And user is logged in with username "sahar"
 
-  @create_post_successfully_seed
+  @create_post_successfully_cleaninsert_seed
+#  @create_post_successfully2_insert_seed
   Scenario: Create a post successfully
     When the user creates a post with title "My First Post" and content "This is my post"
     Then post should be created successfully with title "My First Post" and content "This is my post"
     And user should be redirected to home page
-
 
 
 #  @Create
