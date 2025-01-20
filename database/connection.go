@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	db_postgres "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/joho/godotenv"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -10,7 +11,6 @@ import (
 	//"github.com/glebarez/sqlite"
 	"github.com/golang-migrate/migrate/v4"
 	mysqlDriver "github.com/golang-migrate/migrate/v4/database/mysql"
-	sqliteDriver "github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -19,6 +19,7 @@ import (
 )
 
 var DB *gorm.DB
+var cleanup func()
 
 func InitDB() (*gorm.DB, error) {
 	var err error
@@ -43,20 +44,21 @@ func getDB() gorm.Dialector {
 
 	// Fallback to PostgreSQL Testcontainer
 	ctx := context.Background()
-	dsn, cleanup, err := getTestContainer(ctx)
+	dsn, err := getTestContainer(ctx)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to start PostgreSQL container: %v", err))
 	}
-	defer cleanup() // Ensure the container is cleaned up
 
 	return postgres.Open(dsn)
 }
-
-func getTestContainer(ctx context.Context) (string, func(), error) {
+func ShutDownDB() {
+	cleanup()
+}
+func getTestContainer(ctx context.Context) (string, error) {
 	var env = map[string]string{
-		"POSTGRES_PASSWORD": "root",
-		"POSTGRES_USER":     "root",
-		"POSTGRES_DB":       "my_database",
+		"POSTGRES_PASSWORD": "postgres",
+		"POSTGRES_USER":     "postgres",
+		"POSTGRES_DB":       "postgres",
 	}
 	var port = "5432/tcp"
 	// Define the PostgreSQL container request
@@ -64,7 +66,7 @@ func getTestContainer(ctx context.Context) (string, func(), error) {
 		Image:        "postgres:15-alpine",
 		ExposedPorts: []string{port},
 		Env:          env,
-		WaitingFor:   wait.ForLog("database system is ready to accept connections"),
+		WaitingFor:   wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
 	}
 
 	// Start the PostgreSQL container
@@ -74,25 +76,33 @@ func getTestContainer(ctx context.Context) (string, func(), error) {
 	})
 
 	if err != nil {
-		return "", nil, fmt.Errorf("Failed to start PostgreSQL container: %v", err)
+		return "", fmt.Errorf("Failed to start PostgreSQL container: %v", err)
 	}
 
-	// Get the endpoint (host:port) of the PostgreSQL container
-	endpoint, err := container.Endpoint(ctx, "")
+	// Get the host and port of the PostgreSQL container
+	_, err = container.Host(ctx)
 	if err != nil {
-		return "", nil, fmt.Errorf("Failed to get PostgreSQL container endpoint: %v", err)
+		return "", fmt.Errorf("failed to get PostgreSQL container host: %v", err)
 	}
 
-	// Construct the connection string for GORM
-	dsn := fmt.Sprintf("host=%s port=%s user=root password=root dbname=my_database sslmode=disable",
-		endpoint, "5432")
+	mappedPort, err := container.MappedPort(ctx, "5432")
+	if err != nil {
+		return "", fmt.Errorf("failed to get PostgreSQL container port: %v", err)
+	}
+	fmt.Printf("PORT NUMBER: %d", mappedPort.Port())
 
-	cleanup := func() {
+	//time.Sleep(5 * time.Second)
+	// Construct the connection string for GORM
+
+	dsn := fmt.Sprintf("host=127.0.0.1 user=postgres password=postgres dbname=postgres port=%s sslmode=disable TimeZone=Asia/Jakarta",
+		mappedPort.Port())
+
+	cleanup = func() {
 		if err := container.Terminate(ctx); err != nil {
 			fmt.Printf("Failed to terminate PostgreSQL container: %v\n", err)
 		}
 	}
-	return dsn, cleanup, nil
+	return dsn, nil
 }
 
 func runMigrations(db *gorm.DB) {
@@ -115,14 +125,11 @@ func runMigrations(db *gorm.DB) {
 
 	} else {
 
-		driver, err := sqliteDriver.WithInstance(sqlDB, &sqliteDriver.Config{})
-		if err != nil {
-			log.Fatal("error with instance", err)
-		}
-
-		migration, err = migrate.NewWithDatabaseInstance(
-			"file://../database/migrations",
-			"sqlite",
+		migrationPath := "file://../database/migrations"
+		driver, _ := db_postgres.WithInstance(sqlDB, &db_postgres.Config{})
+		migration, _ = migrate.NewWithDatabaseInstance(
+			migrationPath,
+			"postgres",
 			driver,
 		)
 
