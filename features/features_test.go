@@ -103,6 +103,9 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 		database.InitDB()
 		go server.Serve()
 	})
+	context.AfterSuite(func() {
+		database.ShutDownDB()
+	})
 }
 
 func TestFeatures(t *testing.T) {

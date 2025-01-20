@@ -1,6 +1,6 @@
-create table users(
-    id int AUTO_INCREMENT,
-    username varchar(50),
-    password varchar(255),
-    PRIMARY KEY (id)
+CREATE TABLE "users"
+(
+    "id"       SERIAL PRIMARY KEY,
+    "username" VARCHAR(50),
+    "password" VARCHAR(255)
 );
