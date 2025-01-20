@@ -1,16 +1,18 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"github.com/joho/godotenv"
-
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
+	"gorm.io/driver/postgres"
 	//"github.com/glebarez/sqlite"
 	"github.com/golang-migrate/migrate/v4"
 	mysqlDriver "github.com/golang-migrate/migrate/v4/database/mysql"
 	sqliteDriver "github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"gorm.io/driver/mysql"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"log"
 	"os"
@@ -39,7 +41,58 @@ func getDB() gorm.Dialector {
 		return mysql.Open(v)
 	}
 
-	return sqlite.Open(":memory:")
+	// Fallback to PostgreSQL Testcontainer
+	ctx := context.Background()
+	dsn, cleanup, err := getTestContainer(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to start PostgreSQL container: %v", err))
+	}
+	defer cleanup() // Ensure the container is cleaned up
+
+	return postgres.Open(dsn)
+}
+
+func getTestContainer(ctx context.Context) (string, func(), error) {
+	var env = map[string]string{
+		"POSTGRES_PASSWORD": "root",
+		"POSTGRES_USER":     "root",
+		"POSTGRES_DB":       "my_database",
+	}
+	var port = "5432/tcp"
+	// Define the PostgreSQL container request
+	req := testcontainers.ContainerRequest{
+		Image:        "postgres:15-alpine",
+		ExposedPorts: []string{port},
+		Env:          env,
+		WaitingFor:   wait.ForLog("database system is ready to accept connections"),
+	}
+
+	// Start the PostgreSQL container
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+
+	if err != nil {
+		return "", nil, fmt.Errorf("Failed to start PostgreSQL container: %v", err)
+	}
+
+	// Get the endpoint (host:port) of the PostgreSQL container
+	endpoint, err := container.Endpoint(ctx, "")
+	if err != nil {
+		return "", nil, fmt.Errorf("Failed to get PostgreSQL container endpoint: %v", err)
+	}
+
+	// Construct the connection string for GORM
+	dsn := fmt.Sprintf("host=%s port=%s user=root password=root dbname=my_database sslmode=disable",
+		endpoint, "5432")
+
+	cleanup := func() {
+		if err := container.Terminate(ctx); err != nil {
+			fmt.Printf("Failed to terminate PostgreSQL container: %v\n", err)
+		}
+	}
+	return dsn, cleanup, nil
 }
 
 func runMigrations(db *gorm.DB) {
