@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	db_postgres "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/joho/godotenv"
@@ -10,9 +11,7 @@ import (
 	"gorm.io/driver/postgres"
 	//"github.com/glebarez/sqlite"
 	"github.com/golang-migrate/migrate/v4"
-	mysqlDriver "github.com/golang-migrate/migrate/v4/database/mysql"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
 	"os"
@@ -24,7 +23,10 @@ var cleanup func()
 func InitDB() (*gorm.DB, error) {
 	var err error
 
-	godotenv.Load("../.env")
+	err = godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
 
 	DB, err = gorm.Open(getDB(), &gorm.Config{})
 	if err != nil {
@@ -37,9 +39,8 @@ func InitDB() (*gorm.DB, error) {
 }
 
 func getDB() gorm.Dialector {
-
-	if v, ok := os.LookupEnv("MYSQL_DSN"); ok {
-		return mysql.Open(v)
+	if v, ok := os.LookupEnv("POSTGRESQL_DSN"); ok {
+		return postgres.Open(v)
 	}
 
 	// Fallback to PostgreSQL Testcontainer
@@ -111,34 +112,24 @@ func runMigrations(db *gorm.DB) {
 	var migration *migrate.Migrate
 	var err error
 
-	if db.Name() == "mysql" {
-		driver, err := mysqlDriver.WithInstance(sqlDB, &mysqlDriver.Config{})
-		if err != nil {
-			log.Fatal("error with instance", err)
-		}
-
-		migration, err = migrate.NewWithDatabaseInstance(
-			"file://../database/migrations",
-			"mysql",
-			driver,
-		)
-
-	} else {
-
-		migrationPath := "file://../database/migrations"
-		driver, _ := db_postgres.WithInstance(sqlDB, &db_postgres.Config{})
-		migration, _ = migrate.NewWithDatabaseInstance(
-			migrationPath,
-			"postgres",
-			driver,
-		)
-
-	}
+	migrationPath := "file://database/migrations"
+	driver, err := db_postgres.WithInstance(sqlDB, &db_postgres.Config{})
 	if err != nil {
-		log.Fatal("error with migrations", err)
+		log.Fatal("Failed to create migration driver:", err)
 	}
+	migration, err = migrate.NewWithDatabaseInstance(
+		migrationPath,
+		"postgres",
+		driver,
+	)
+	if err != nil {
+		log.Fatal("Failed to initialize migrate instance:", err)
+	}
+
 	err = migration.Up()
-	if err != nil {
-		log.Fatal("error with run up scripts ", err)
+	if err != nil && !errors.Is(migrate.ErrNoChange, err) {
+		log.Fatal("Failed to apply migrations:", err)
 	}
+
+	log.Println("Migrations applied successfully!")
 }
