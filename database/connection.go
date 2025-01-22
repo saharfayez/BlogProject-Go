@@ -4,17 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4"
 	db_postgres "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/joho/godotenv"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"gorm.io/driver/postgres"
-	//"github.com/glebarez/sqlite"
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"gorm.io/gorm"
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 )
 
 var DB *gorm.DB
@@ -22,8 +24,17 @@ var cleanup func()
 
 func InitDB() (*gorm.DB, error) {
 	var err error
+	var envPath string
 
-	err = godotenv.Load()
+	currentDirectory, currentDirName := getCurrentDirectory()
+
+	if currentDirName == "features" {
+		envPath = filepath.Join(currentDirectory, "..", ".env")
+	} else {
+		envPath = filepath.Join(currentDirectory, ".env")
+	}
+
+	err = godotenv.Load(envPath)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +43,6 @@ func InitDB() (*gorm.DB, error) {
 	if err != nil {
 		log.Fatal("Error connecting to the database: ", err)
 	}
-	fmt.Println(DB.Name())
 	runMigrations(DB)
 
 	return DB, nil
@@ -111,8 +121,16 @@ func runMigrations(db *gorm.DB) {
 
 	var migration *migrate.Migrate
 	var err error
+	var migrationPath string
 
-	migrationPath := "file://database/migrations"
+	currentDirectory, currentDirName := getCurrentDirectory()
+
+	if currentDirName == "features" {
+		migrationPath = filepath.Join("file://", currentDirectory, "..", "database/migrations")
+	} else {
+		migrationPath = filepath.Join("file://", currentDirectory, "database/migrations")
+	}
+
 	driver, err := db_postgres.WithInstance(sqlDB, &db_postgres.Config{})
 	if err != nil {
 		log.Fatal("Failed to create migration driver:", err)
@@ -132,4 +150,23 @@ func runMigrations(db *gorm.DB) {
 	}
 
 	log.Println("Migrations applied successfully!")
+}
+
+func getCurrentDirectory() (string, string) {
+
+	currentDirectory, err := os.Getwd()
+	if err != nil {
+		log.Fatal("Failed to get current directory", err)
+	}
+
+	var directories []string
+	if runtime.GOOS == "windows" {
+		directories = strings.Split(currentDirectory, "\\")
+	} else {
+		directories = strings.Split(currentDirectory, "/")
+	}
+
+	currentDirName := directories[len(directories)-1]
+
+	return currentDirectory, currentDirName
 }
