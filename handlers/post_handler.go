@@ -31,16 +31,13 @@ func CreatePost(c echo.Context) error {
 		return c.String(http.StatusNotFound, "User not found")
 	}
 
-	// Bind the post data
 	var post models.Post
 	if err := c.Bind(&post); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	// Set the UserID for the post
 	post.UserID = user.ID
 
-	// Create the post
 	if err := database.DB.Create(&post).Error; err != nil {
 		fmt.Println("Error creating post:", err)
 		return c.String(http.StatusInternalServerError, "Error creating post")
@@ -60,6 +57,7 @@ func GetPost(c echo.Context) error {
 	}
 	return c.JSON(http.StatusFound, post)
 }
+
 func UpdatePost(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
