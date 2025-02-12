@@ -11,19 +11,19 @@ type UserService interface {
 	Login(username, password string) (string, error)
 }
 
-type UserServiceImpl struct {
+type userServiceImpl struct {
 	userRepo UserRepository
 }
 
 func NewUserService(userRepo UserRepository) UserService {
-	return &UserServiceImpl{userRepo: userRepo}
+	return &userServiceImpl{userRepo: userRepo}
 }
 
-func (userServiceImpl *UserServiceImpl) GetName() string {
+func (userServiceImpl *userServiceImpl) GetName() string {
 	return "UserService"
 }
 
-func (userServiceImpl *UserServiceImpl) Signup(user *User) error {
+func (userServiceImpl *userServiceImpl) Signup(user *User) error {
 
 	existingUser, _ := userServiceImpl.userRepo.FindUserByUsername(user.Username)
 	if existingUser != nil {
@@ -37,7 +37,7 @@ func (userServiceImpl *UserServiceImpl) Signup(user *User) error {
 	return userServiceImpl.userRepo.Save(user)
 }
 
-func (userServiceImpl *UserServiceImpl) Login(username, password string) (string, error) {
+func (userServiceImpl *userServiceImpl) Login(username, password string) (string, error) {
 
 	existingUser, err := userServiceImpl.userRepo.FindUserByUsername(username)
 	if err != nil {
