@@ -1,42 +1,30 @@
-package handlers
+package users
 
 import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
-	"goproject/database"
-	"goproject/dtos"
-	"goproject/locator"
-	"goproject/mapping"
-	"goproject/models"
-	"goproject/response"
-	"goproject/service"
+	"goproject/context"
 	"goproject/utils"
 	"net/http"
 )
 
 func Signup(c echo.Context) error {
 
-	var userDto dtos.UserDto
+	var userDto UserDto
 	if err := c.Bind(&userDto); err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
 
-	user := mapping.MapUserDtoToUser(userDto)
-	serviceLocator := locator.NewServiceLocator()
-	genericService := serviceLocator.Locate("UserService")
+	user := MapUserDtoToUser(userDto)
 
-	if genericService == nil {
-		return c.String(http.StatusInternalServerError, "genericService not found")
-	}
-
-	userService := genericService.(service.UserService)
+	userService := context.Context.UserService
 
 	err := userService.Signup(&user)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	var signupResponse response.SignUpResponse
+	var signupResponse SignUpResponse
 
 	signupResponse.ID = user.ID
 	signupResponse.Username = user.Username
@@ -46,13 +34,13 @@ func Signup(c echo.Context) error {
 
 func Login(c echo.Context) error {
 
-	var userDto dtos.UserDto
+	var userDto UserDto
 	if err := c.Bind(&userDto); err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
 
-	var user models.User
-	result := database.DB.Where("username = ?", userDto.Username).First(&user)
+	var user User
+	result := context.Context.DB.Where("username = ?", userDto.Username).First(&user)
 	if result.Error != nil {
 		c.Logger().Error(result.Error)
 		return c.String(http.StatusNotFound, "User not found")
@@ -70,7 +58,7 @@ func Login(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error generating token")
 	}
 
-	var loginResponse response.LoginResponse
+	var loginResponse LoginResponse
 	loginResponse.Token = token
 
 	return c.JSON(http.StatusOK, loginResponse)

@@ -1,4 +1,4 @@
-package models
+package posts
 
 type Post struct {
 	ID      uint   `gorm:"primaryKey;autoIncrement"`

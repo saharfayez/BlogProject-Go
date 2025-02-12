@@ -1,4 +1,4 @@
-package response
+package users
 
 type SignUpResponse struct {
 	ID       int

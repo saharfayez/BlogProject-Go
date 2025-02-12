@@ -1,4 +1,4 @@
-package features
+package BDD
 
 import (
 	"bytes"
@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
-	"goproject/database"
-	"goproject/models"
+	"goproject/users"
+	"goproject/posts"
 	"goproject/utils"
 	"net/http"
+	contextpkg "goproject/context"
 )
 
 var baseURL = "http://localhost:8080"
@@ -50,14 +51,14 @@ func (state *ScenarioState) theUserCreatesPostWithTitleAndContent(title, content
 	return nil
 }
 func (state *ScenarioState) postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
-	var user models.User
+	var user users.User
 	username := state.data["username"].(string)
-	if err := database.DB.Where("username = ?", username).First(&user).Error; err != nil {
+	if err := contextpkg.Context.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		return fmt.Errorf("failed to find user with username '%s': %v", username, err)
 	}
 
-	var post models.Post
-	if err := database.DB.Where("user_id = ?", user.ID).Last(&post).Error; err != nil {
+	var post posts.Post
+	if err := contextpkg.Context.DB.Where("user_id = ?", user.ID).Last(&post).Error; err != nil {
 		return fmt.Errorf("failed to find the last post for user '%s': %v", username, err)
 	}
 

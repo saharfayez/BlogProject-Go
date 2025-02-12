@@ -19,7 +19,6 @@ import (
 	"strings"
 )
 
-var DB *gorm.DB
 var cleanup func()
 
 func InitDB() (*gorm.DB, error) {
@@ -39,13 +38,13 @@ func InitDB() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	DB, err = gorm.Open(getDB(), &gorm.Config{})
+	db, err := gorm.Open(getDB(), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Error connecting to the database: ", err)
 	}
-	runMigrations(DB)
+	runMigrations(db)
 
-	return DB, nil
+	return db, nil
 }
 
 func getDB() gorm.Dialector {

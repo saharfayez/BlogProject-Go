@@ -1,4 +1,4 @@
-package features
+package BDD
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	contextpkg "goproject/context"
 )
 
 type DatabaseOperation string
@@ -73,13 +74,13 @@ func extractDatabaseSetups(sc *godog.Scenario) *[]DatabaseSetup {
 }
 
 func loadFixtures(operation DatabaseOperation, files ...string) error {
-	db, err := database.DB.DB()
+	db, err := contextpkg.Context.DB.DB()
 	if err != nil {
 		return err
 	}
 	options := []func(*testfixtures.Loader) error{
 		testfixtures.Database(db),
-		testfixtures.Dialect(database.DB.Dialector.Name()),
+		testfixtures.Dialect(contextpkg.Context.DB.Dialector.Name()),
 		testfixtures.DangerousSkipTestDatabaseCheck(),
 		testfixtures.FilesMultiTables(files...),
 	}
@@ -100,7 +101,7 @@ func loadFixtures(operation DatabaseOperation, files ...string) error {
 
 func InitializeTestSuite(context *godog.TestSuiteContext) {
 	context.BeforeSuite(func() {
-		database.InitDB()
+		contextpkg.InitContext()
 		go server.Serve()
 	})
 	context.AfterSuite(func() {
