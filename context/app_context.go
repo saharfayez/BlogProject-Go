@@ -46,7 +46,8 @@ func (Context *applicationContextImpl) GetPostRepository() posts.PostRepository 
 	return Context.postRepository
 }
 
-func InitContext() {
+// this is called once by go before main
+func init() {
 
 	db, err := database.InitDB()
 

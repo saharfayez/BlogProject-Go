@@ -101,7 +101,6 @@ func loadFixtures(operation DatabaseOperation, files ...string) error {
 
 func InitializeTestSuite(context *godog.TestSuiteContext) {
 	context.BeforeSuite(func() {
-		contextpkg.InitContext()
 		go server.Serve()
 	})
 	context.AfterSuite(func() {
