@@ -1,5 +1,5 @@
 package users
 
-type LoginResponse struct {
+type LoginResponseDto struct {
 	Token string
 }

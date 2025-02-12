@@ -1,6 +1,6 @@
 package users
 
-type SignUpResponse struct {
+type SignUpResponseDto struct {
 	ID       int
 	Username string
 }

@@ -17,14 +17,14 @@ func Signup(c echo.Context) error {
 
 	user := MapUserDtoToUser(userDto)
 
-	userService := context.Context.UserService
+	userService := context.Context.GetUserService()
 
 	err := userService.Signup(&user)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	var signupResponse SignUpResponse
+	var signupResponse SignUpResponseDto
 
 	signupResponse.ID = user.ID
 	signupResponse.Username = user.Username
@@ -40,7 +40,7 @@ func Login(c echo.Context) error {
 	}
 
 	var user User
-	result := context.Context.DB.Where("username = ?", userDto.Username).First(&user)
+	result := context.Context.GetDB().Where("username = ?", userDto.Username).First(&user)
 	if result.Error != nil {
 		c.Logger().Error(result.Error)
 		return c.String(http.StatusNotFound, "User not found")
@@ -58,7 +58,7 @@ func Login(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error generating token")
 	}
 
-	var loginResponse LoginResponse
+	var loginResponse LoginResponseDto
 	loginResponse.Token = token
 
 	return c.JSON(http.StatusOK, loginResponse)

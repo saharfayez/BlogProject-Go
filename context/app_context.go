@@ -8,17 +8,43 @@ import (
 	"log"
 )
 
-type ApplicationContext struct {
-	DB *gorm.DB
+type ApplicationContext interface {
+	GetDB() *gorm.DB
 
-	UserRepository users.UserRepository
+	GetUserRepository() users.UserRepository
 
-	UserService    users.UserService
+	GetUserService() users.UserService
 
-	PostRepository posts.PostRepository
+	GetPostRepository() posts.PostRepository
 }
 
-var Context *ApplicationContext
+type ApplicationContextImpl struct {
+	db *gorm.DB
+
+	userRepository users.UserRepository
+
+	userService users.UserService
+
+	postRepository posts.PostRepository
+}
+
+func (Context *ApplicationContextImpl) GetDB() *gorm.DB {
+	return Context.db
+}
+
+func (Context *ApplicationContextImpl) GetUserRepository() users.UserRepository {
+	return Context.userRepository
+}
+
+func (Context *ApplicationContextImpl) GetUserService() users.UserService {
+	return Context.userService
+}
+
+func (Context *ApplicationContextImpl) GetPostRepository() posts.PostRepository {
+	return Context.postRepository
+}
+
+var Context ApplicationContext
 
 func InitContext() {
 
@@ -32,7 +58,7 @@ func InitContext() {
 	userService := users.NewUserService(userRepository)
 	postRepository := posts.NewPostRepository(db)
 
-	Context = &ApplicationContext{
+	Context = &ApplicationContextImpl{
 		db,
 		userRepository,
 		userService,

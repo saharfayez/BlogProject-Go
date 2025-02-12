@@ -74,13 +74,13 @@ func extractDatabaseSetups(sc *godog.Scenario) *[]DatabaseSetup {
 }
 
 func loadFixtures(operation DatabaseOperation, files ...string) error {
-	db, err := contextpkg.Context.DB.DB()
+	db, err := contextpkg.Context.GetDB().DB()
 	if err != nil {
 		return err
 	}
 	options := []func(*testfixtures.Loader) error{
 		testfixtures.Database(db),
-		testfixtures.Dialect(contextpkg.Context.DB.Dialector.Name()),
+		testfixtures.Dialect(contextpkg.Context.GetDB().Dialector.Name()),
 		testfixtures.DangerousSkipTestDatabaseCheck(),
 		testfixtures.FilesMultiTables(files...),
 	}
