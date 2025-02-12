@@ -8,7 +8,7 @@ import (
 	"goproject/posts"
 )
 
-func RegisterRoutes() *echo.Echo {
+func registerRoutes() *echo.Echo {
 	e := echo.New()
 
 	e.POST("/signup", users.Signup)

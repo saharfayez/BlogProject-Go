@@ -1,6 +1,6 @@
 package server
 
 func Serve() {
-	e := RegisterRoutes()
+	e := registerRoutes()
 	e.Logger.Fatal(e.Start(":8080"))
 }
