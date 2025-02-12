@@ -27,7 +27,7 @@ func InitDB() (*gorm.DB, error) {
 
 	currentDirectory, currentDirName := getCurrentDirectory()
 
-	if currentDirName == "features" {
+	if currentDirName == "bdd" {
 		envPath = filepath.Join(currentDirectory, "..", ".env")
 	} else {
 		envPath = filepath.Join(currentDirectory, ".env")
@@ -42,6 +42,7 @@ func InitDB() (*gorm.DB, error) {
 	if err != nil {
 		log.Fatal("Error connecting to the database: ", err)
 	}
+
 	runMigrations(db)
 
 	return db, nil
@@ -124,7 +125,7 @@ func runMigrations(db *gorm.DB) {
 
 	currentDirectory, currentDirName := getCurrentDirectory()
 
-	if currentDirName == "features" {
+	if currentDirName == "bdd" {
 		migrationPath = filepath.Join("file://", currentDirectory, "..", "database/migrations")
 	} else {
 		migrationPath = filepath.Join("file://", currentDirectory, "database/migrations")
