@@ -104,7 +104,7 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 		go server.Serve()
 	})
 	context.AfterSuite(func() {
-		database.ShutDownDB()
+		database.ShutDownTestContainer()
 	})
 }
 

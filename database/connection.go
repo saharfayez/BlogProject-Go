@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-var cleanup func()
+var ShutDownTestContainer func()
 
 func InitDB() (*gorm.DB, error) {
 	var err error
@@ -62,9 +62,7 @@ func getDB() gorm.Dialector {
 
 	return postgres.Open(dsn)
 }
-func ShutDownDB() {
-	cleanup()
-}
+
 func getTestContainer(ctx context.Context) (string, error) {
 	var env = map[string]string{
 		"POSTGRES_PASSWORD": "postgres",
@@ -108,7 +106,7 @@ func getTestContainer(ctx context.Context) (string, error) {
 	dsn := fmt.Sprintf("host=127.0.0.1 user=postgres password=postgres dbname=postgres port=%s sslmode=disable TimeZone=Asia/Jakarta",
 		mappedPort.Port())
 
-	cleanup = func() {
+	ShutDownTestContainer = func() {
 		if err := container.Terminate(ctx); err != nil {
 			fmt.Printf("Failed to terminate PostgreSQL container: %v\n", err)
 		}
