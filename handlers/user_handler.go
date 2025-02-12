@@ -5,9 +5,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"goproject/database"
 	"goproject/dtos"
+	"goproject/locator"
 	"goproject/mapping"
 	"goproject/models"
 	"goproject/response"
+	"goproject/service"
 	"goproject/utils"
 	"net/http"
 )
@@ -20,29 +22,20 @@ func Signup(c echo.Context) error {
 	}
 
 	user := mapping.MapUserDtoToUser(userDto)
-	var existingUser models.User
+	serviceLocator := locator.NewServiceLocator()
+	genericService := serviceLocator.Locate("UserService")
 
-	error := database.DB.Where("username = ?", user.Username).First(&existingUser).Error
-
-	if error == nil {
-		c.Logger().Error(error)
-		return c.String(http.StatusBadRequest, "Username already exists. Please choose another one.")
+	if genericService == nil {
+		return c.String(http.StatusInternalServerError, "genericService not found")
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	userService := genericService.(service.UserService)
+
+	err := userService.Signup(&user)
 	if err != nil {
-		c.Logger().Error(err)
-		return c.String(http.StatusInternalServerError, "Error hashing password")
-
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	user.Password = string(hashedPassword)
 
-	result := database.DB.Create(&user)
-	if result.Error != nil {
-		c.Logger().Error(result.Error)
-		return c.String(http.StatusInternalServerError, "Error creating user")
-
-	}
 	var signupResponse response.SignUpResponse
 
 	signupResponse.ID = user.ID
@@ -79,9 +72,6 @@ func Login(c echo.Context) error {
 
 	var loginResponse response.LoginResponse
 	loginResponse.Token = token
-
-	//var users []models.User
-	//database.DB.Preload("Posts").Find(&users)
 
 	return c.JSON(http.StatusOK, loginResponse)
 }
