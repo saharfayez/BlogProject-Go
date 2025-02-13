@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"goproject/internal/app/impl/posts"
-	"goproject/internal/app/impl/users"
+	"goproject/internal/app/business/impl/posts"
+	"goproject/internal/app/business/impl/users"
 	appmiddleware "goproject/internal/app/middleware"
 )
 

@@ -3,7 +3,7 @@ package users
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	"goproject/internal/app/interfaces/users"
+	"goproject/internal/app/business/interfaces/users"
 	middleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
 )

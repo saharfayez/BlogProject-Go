@@ -9,7 +9,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-	appcontext "goproject/internal/app/interfaces/context"
+	appcontext "goproject/internal/app/context"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	_ "goproject/internal/app/impl/context"
+	_ "goproject/internal/app/context/impl"
 	"goproject/internal/app/server"
 	"runtime"
 )

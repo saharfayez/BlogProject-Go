@@ -1,12 +1,12 @@
-package context
+package impl
 
 import (
+	postsimpl "goproject/internal/app/business/impl/posts"
+	usersimpl "goproject/internal/app/business/impl/users"
+	"goproject/internal/app/business/interfaces/posts"
+	"goproject/internal/app/business/interfaces/users"
+	"goproject/internal/app/context"
 	"goproject/internal/app/database"
-	postsimpl "goproject/internal/app/impl/posts"
-	usersimpl "goproject/internal/app/impl/users"
-	"goproject/internal/app/interfaces/context"
-	"goproject/internal/app/interfaces/posts"
-	"goproject/internal/app/interfaces/users"
 	"gorm.io/gorm"
 )
 

@@ -3,7 +3,7 @@ package users
 import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
-	"goproject/internal/app/interfaces/context"
+	"goproject/internal/app/context"
 	middleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
 	"net/http"

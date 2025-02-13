@@ -1,7 +1,7 @@
 package users
 
 import (
-	"goproject/internal/app/interfaces/users"
+	"goproject/internal/app/business/interfaces/users"
 	"goproject/internal/app/models"
 	"gorm.io/gorm"
 )

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
-	appcontext "goproject/internal/app/interfaces/context"
+	appcontext "goproject/internal/app/context"
 	middleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
 	"net/http"

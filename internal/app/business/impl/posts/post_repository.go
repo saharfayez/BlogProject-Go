@@ -1,7 +1,7 @@
 package posts
 
 import (
-	"goproject/internal/app/interfaces/posts"
+	"goproject/internal/app/business/interfaces/posts"
 	"goproject/internal/app/models"
 	"gorm.io/gorm"
 )

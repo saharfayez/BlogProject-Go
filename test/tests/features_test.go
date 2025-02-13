@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/go-testfixtures/testfixtures/v3"
+	appcontext "goproject/internal/app/context"
+	_ "goproject/internal/app/context/impl"
 	"goproject/internal/app/database"
-	_ "goproject/internal/app/impl/context"
-	contextpkg "goproject/internal/app/interfaces/context"
 	"goproject/internal/app/server"
 	"log"
 	"os"
@@ -81,13 +81,13 @@ func extractDatabaseSetups(sc *godog.Scenario) *[]DatabaseSetup {
 }
 
 func loadFixtures(operation DatabaseOperation, files ...string) error {
-	db, err := contextpkg.Context.GetDB().DB()
+	db, err := appcontext.Context.GetDB().DB()
 	if err != nil {
 		return err
 	}
 	options := []func(*testfixtures.Loader) error{
 		testfixtures.Database(db),
-		testfixtures.Dialect(contextpkg.Context.GetDB().Dialector.Name()),
+		testfixtures.Dialect(appcontext.Context.GetDB().Dialector.Name()),
 		testfixtures.DangerousSkipTestDatabaseCheck(),
 		testfixtures.FilesMultiTables(files...),
 	}

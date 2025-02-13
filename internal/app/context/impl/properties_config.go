@@ -1,8 +1,8 @@
-package context
+package impl
 
 import (
 	"github.com/joho/godotenv"
-	"goproject/internal/app/interfaces/context"
+	"goproject/internal/app/context"
 	"log"
 	"os"
 )

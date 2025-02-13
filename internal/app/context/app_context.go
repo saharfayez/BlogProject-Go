@@ -1,8 +1,8 @@
 package context
 
 import (
-	"goproject/internal/app/interfaces/posts"
-	"goproject/internal/app/interfaces/users"
+	"goproject/internal/app/business/interfaces/posts"
+	"goproject/internal/app/business/interfaces/users"
 	"gorm.io/gorm"
 )
 
