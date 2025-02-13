@@ -25,13 +25,9 @@ func InitDB() (*gorm.DB, error) {
 	var err error
 	var envPath string
 
-	currentDirectory, currentDirName := getCurrentDirectory()
+	currentDirectory, _ := getCurrentDirectory()
 
-	if currentDirName == "bdd" {
-		envPath = filepath.Join(currentDirectory, "..", ".env")
-	} else {
-		envPath = filepath.Join(currentDirectory, ".env")
-	}
+	envPath = filepath.Join(currentDirectory, ".env")
 
 	err = godotenv.Load(envPath)
 	if err != nil {
@@ -121,13 +117,8 @@ func runMigrations(db *gorm.DB) {
 	var err error
 	var migrationPath string
 
-	currentDirectory, currentDirName := getCurrentDirectory()
-
-	if currentDirName == "bdd" {
-		migrationPath = filepath.Join("file://", currentDirectory, "..", "database/migrations")
-	} else {
-		migrationPath = filepath.Join("file://", currentDirectory, "database/migrations")
-	}
+	currentDirectory, _ := getCurrentDirectory()
+	migrationPath = filepath.Join("file://", currentDirectory, "database/migrations")
 
 	driver, err := db_postgres.WithInstance(sqlDB, &db_postgres.Config{})
 	if err != nil {
