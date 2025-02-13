@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	appcontext "goproject/interfaces/context"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -23,20 +24,6 @@ var ShutDownTestContainer func()
 
 func InitDB() (*gorm.DB, error) {
 	var err error
-	var envPath string
-
-	currentDirectory, currentDirName := getCurrentDirectory()
-
-	if currentDirName == "tests" {
-		envPath = filepath.Join(currentDirectory, "..", "..", ".env")
-	} else {
-		envPath = filepath.Join(currentDirectory, ".env")
-	}
-
-	err = godotenv.Load(envPath)
-	if err != nil {
-		return nil, err
-	}
 
 	db, err := gorm.Open(getDB(), &gorm.Config{})
 	if err != nil {
@@ -49,21 +36,20 @@ func InitDB() (*gorm.DB, error) {
 }
 
 func getDB() gorm.Dialector {
-	if v, ok := os.LookupEnv("POSTGRESQL_DSN"); ok {
-		return postgres.Open(v)
+	if appcontext.Context.GetPropertiesConfig().GetProfile() != "test" {
+		return postgres.Open(appcontext.Context.GetPropertiesConfig().GetDatabaseUrl())
+	} else {
+		// Fallback to PostgreSQL Testcontainer
+		ctx := context.Background()
+		dsn, err := startTestContainer(ctx)
+		if err != nil {
+			panic(fmt.Sprintf("Failed to start PostgreSQL container: %v", err))
+		}
+		return postgres.Open(dsn)
 	}
-
-	// Fallback to PostgreSQL Testcontainer
-	ctx := context.Background()
-	dsn, err := getTestContainer(ctx)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to start PostgreSQL container: %v", err))
-	}
-
-	return postgres.Open(dsn)
 }
 
-func getTestContainer(ctx context.Context) (string, error) {
+func startTestContainer(ctx context.Context) (string, error) {
 	var env = map[string]string{
 		"POSTGRES_PASSWORD": "postgres",
 		"POSTGRES_USER":     "postgres",

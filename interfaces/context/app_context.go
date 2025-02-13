@@ -9,6 +9,8 @@ import (
 var Context ApplicationContext
 
 type ApplicationContext interface {
+	GetPropertiesConfig() PropertiesConfig
+
 	GetDB() *gorm.DB
 
 	GetUserRepository() users.UserRepository
