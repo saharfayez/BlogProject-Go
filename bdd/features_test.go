@@ -6,7 +6,7 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/go-testfixtures/testfixtures/v3"
 	"goproject/database"
-	contextpkg "goproject/interfaces"
+	contextpkg "goproject/interfaces/context"
 	"goproject/server"
 	"log"
 	"os"

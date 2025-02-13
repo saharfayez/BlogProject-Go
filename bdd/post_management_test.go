@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
-	contextpkg "goproject/interfaces"
-	"goproject/posts"
-	"goproject/users"
+	contextpkg "goproject/interfaces/context"
+	"goproject/models"
 	"goproject/utils"
 	"net/http"
 )
@@ -51,13 +50,13 @@ func (state *ScenarioState) theUserCreatesPostWithTitleAndContent(title, content
 	return nil
 }
 func (state *ScenarioState) postShouldBeCreatedSuccessfullyWithTitleAndContent(title, content string) error {
-	var user users.User
+	var user models.User
 	username := state.data["username"].(string)
 	if err := contextpkg.Context.GetDB().Where("username = ?", username).First(&user).Error; err != nil {
 		return fmt.Errorf("failed to find user with username '%s': %v", username, err)
 	}
 
-	var post posts.Post
+	var post models.Post
 	if err := contextpkg.Context.GetDB().Where("user_id = ?", user.ID).Last(&post).Error; err != nil {
 		return fmt.Errorf("failed to find the last post for user '%s': %v", username, err)
 	}
