@@ -43,8 +43,9 @@ func Login(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error generating token")
 	}
 
-	var loginResponse LoginResponseDto
-	loginResponse.Token = token
+	loginResponse := LoginResponseDto{
+		Token: token,
+	}
 
 	return c.JSON(http.StatusOK, loginResponse)
 }
