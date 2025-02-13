@@ -7,7 +7,6 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	db_postgres "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/joho/godotenv"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	appcontext "goproject/interfaces/context"

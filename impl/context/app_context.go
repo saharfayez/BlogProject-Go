@@ -45,9 +45,9 @@ func (Context *applicationContextImpl) GetPostRepository() posts.PostRepository 
 // this is called once by go before main
 func init() {
 
-	propertiesConfig := newPropertiesConfig()
+	propertiesConf := newPropertiesConfig()
 
-	appContext := &applicationContextImpl{propertiesConfig: propertiesConfig}
+	appContext := &applicationContextImpl{propertiesConfig: propertiesConf}
 	context.Context = appContext
 
 	db, _ := database.InitDB()
