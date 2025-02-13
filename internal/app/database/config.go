@@ -15,8 +15,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 )
 
 var ShutDownTestContainer func()
@@ -106,14 +104,10 @@ func runMigrations(db *gorm.DB) {
 	var err error
 	var migrationPath string
 
-	currentDirectory, currentDirName := getCurrentDirectory()
+	currentDirectory := getCurrentDirectory()
 	fmt.Println("current", currentDirectory)
 
-	if currentDirName == "tests" {
-		migrationPath = filepath.Join("file://", currentDirectory, "..", "..", "/internal/app/database/migrations")
-	} else {
-		migrationPath = filepath.Join("file://", currentDirectory, "/internal/app/database/migrations")
-	}
+	migrationPath = filepath.Join("file://", currentDirectory, "..", "..", "/internal/app/database/migrations")
 
 	driver, err := db_postgres.WithInstance(sqlDB, &db_postgres.Config{})
 	if err != nil {
@@ -136,21 +130,12 @@ func runMigrations(db *gorm.DB) {
 	log.Println("Migrations applied successfully!")
 }
 
-func getCurrentDirectory() (string, string) {
+func getCurrentDirectory() string {
 
 	currentDirectory, err := os.Getwd()
 	if err != nil {
 		log.Fatal("Failed to get current directory", err)
 	}
 
-	var directories []string
-	if runtime.GOOS == "windows" {
-		directories = strings.Split(currentDirectory, "\\")
-	} else {
-		directories = strings.Split(currentDirectory, "/")
-	}
-
-	currentDirName := directories[len(directories)-1]
-
-	return currentDirectory, currentDirName
+	return currentDirectory
 }
