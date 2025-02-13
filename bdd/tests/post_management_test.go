@@ -1,4 +1,4 @@
-package bdd
+package tests
 
 import (
 	"bytes"
@@ -11,12 +11,6 @@ import (
 	"goproject/utils"
 	"net/http"
 )
-
-var baseURL = "http://localhost:8080"
-
-type ScenarioState struct {
-	data map[string]interface{}
-}
 
 func (state *ScenarioState) anAccountExistsWithUsername(username string) error {
 	return nil

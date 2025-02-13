@@ -1,4 +1,4 @@
-package bdd
+package tests
 
 import (
 	"context"
@@ -21,6 +21,12 @@ const (
 	insertOperation      DatabaseOperation = "insert"
 	cleanInsertOperation DatabaseOperation = "clean_insert"
 )
+
+var baseURL = "http://localhost:8080"
+
+type ScenarioState struct {
+	data map[string]interface{}
+}
 
 type DatabaseSetup struct {
 	fileName  string
