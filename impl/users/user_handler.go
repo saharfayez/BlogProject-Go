@@ -3,7 +3,7 @@ package users
 import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
-	"goproject/interfaces"
+	"goproject/interfaces/context"
 	"goproject/models"
 	"goproject/utils"
 	"net/http"
@@ -18,7 +18,7 @@ func Signup(c echo.Context) error {
 
 	user := MapUserDtoToUser(userDto)
 
-	userService := interfaces.Context.GetUserService()
+	userService := context.Context.GetUserService()
 
 	err := userService.Signup(&user)
 	if err != nil {
@@ -41,7 +41,7 @@ func Login(c echo.Context) error {
 	}
 
 	var user models.User
-	result := interfaces.Context.GetDB().Where("username = ?", userDto.Username).First(&user)
+	result := context.Context.GetDB().Where("username = ?", userDto.Username).First(&user)
 	if result.Error != nil {
 		c.Logger().Error(result.Error)
 		return c.String(http.StatusNotFound, "User not found")

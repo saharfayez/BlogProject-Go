@@ -1,7 +1,7 @@
 package users
 
 import (
-	"goproject/interfaces"
+	"goproject/interfaces/users"
 	"goproject/models"
 	"gorm.io/gorm"
 )
@@ -10,7 +10,7 @@ type userRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) interfaces.UserRepository {
+func NewUserRepository(db *gorm.DB) users.UserRepository {
 	return &userRepositoryImpl{db: db}
 }
 

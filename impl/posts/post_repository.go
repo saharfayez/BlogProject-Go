@@ -1,7 +1,7 @@
 package posts
 
 import (
-	"goproject/interfaces"
+	"goproject/interfaces/posts"
 	"goproject/models"
 	"gorm.io/gorm"
 )
@@ -10,7 +10,7 @@ type postRepositoryImpl struct {
 	db *gorm.DB
 }
 
-func NewPostRepository(db *gorm.DB) interfaces.PostRepository {
+func NewPostRepository(db *gorm.DB) posts.PostRepository {
 	return &postRepositoryImpl{db: db}
 }
 

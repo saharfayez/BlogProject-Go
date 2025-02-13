@@ -3,9 +3,9 @@ package server
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"goproject/impl/posts"
+	"goproject/impl/users"
 	middlewares "goproject/middleware"
-	"goproject/users"
-	"goproject/posts"
 )
 
 func registerRoutes() *echo.Echo {

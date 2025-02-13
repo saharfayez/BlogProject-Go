@@ -1,4 +1,4 @@
-package interfaces
+package users
 
 import "goproject/models"
 

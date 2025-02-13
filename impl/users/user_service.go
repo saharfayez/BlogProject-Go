@@ -3,16 +3,16 @@ package users
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	"goproject/interfaces"
+	"goproject/interfaces/users"
 	"goproject/models"
 	"goproject/utils"
 )
 
 type userServiceImpl struct {
-	userRepo interfaces.UserRepository
+	userRepo users.UserRepository
 }
 
-func NewUserService(userRepo interfaces.UserRepository) interfaces.UserService {
+func NewUserService(userRepo users.UserRepository) users.UserService {
 	return &userServiceImpl{userRepo: userRepo}
 }
 

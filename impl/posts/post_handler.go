@@ -3,7 +3,7 @@ package posts
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"goproject/interfaces"
+	"goproject/interfaces/context"
 	"goproject/models"
 	"goproject/utils"
 	"net/http"
@@ -14,7 +14,7 @@ func GetPosts(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	var posts []models.Post
 
-	result := interfaces.Context.GetDB().Find(&posts)
+	result := context.Context.GetDB().Find(&posts)
 	if result.Error != nil {
 		return c.String(http.StatusInternalServerError, "Error querying posts")
 	}
@@ -27,7 +27,7 @@ func CreatePost(c echo.Context) error {
 	username := utils.GetTokenFromContext(c)
 
 	var user models.User
-	if err := interfaces.Context.GetDB().Where("username = ?", username).First(&user).Error; err != nil {
+	if err := context.Context.GetDB().Where("username = ?", username).First(&user).Error; err != nil {
 		return c.String(http.StatusNotFound, "User not found")
 	}
 
@@ -38,7 +38,7 @@ func CreatePost(c echo.Context) error {
 
 	post.UserID = user.ID
 
-	if err := interfaces.Context.GetDB().Create(&post).Error; err != nil {
+	if err := context.Context.GetDB().Create(&post).Error; err != nil {
 		fmt.Println("Error creating post:", err)
 		return c.String(http.StatusInternalServerError, "Error creating post")
 	}
@@ -51,7 +51,7 @@ func GetPost(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	id := c.Param("id")
 	var post models.Post
-	result := interfaces.Context.GetDB().First(&post, id)
+	result := context.Context.GetDB().First(&post, id)
 	if result.Error != nil {
 		return c.String(http.StatusNotFound, "Error getting post")
 	}
@@ -76,7 +76,7 @@ func UpdatePost(c echo.Context) error {
 	updatedPost.UserID = user.ID
 	updatedPost.ID = post.ID
 
-	if err := interfaces.Context.GetDB().Save(&updatedPost).Error; err != nil {
+	if err := context.Context.GetDB().Save(&updatedPost).Error; err != nil {
 		c.Logger().Error(err)
 		return c.String(http.StatusInternalServerError, "Error updating post")
 	}
@@ -93,7 +93,7 @@ func DeletePost(c echo.Context) error {
 	}
 
 	var post models.Post
-	result := interfaces.Context.GetDB().Delete(&post, id)
+	result := context.Context.GetDB().Delete(&post, id)
 	if result.Error != nil {
 		return c.String(http.StatusNotFound, "Error deleting post")
 	}
@@ -105,13 +105,13 @@ func authorizePost(c echo.Context) (models.User, models.Post, error) {
 	id := c.Param("id")
 
 	var post models.Post
-	if err := interfaces.Context.GetDB().First(&post, id).Error; err != nil {
+	if err := context.Context.GetDB().First(&post, id).Error; err != nil {
 		c.Logger().Error(err)
 		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusNotFound, "Post not found")
 	}
 
 	var user models.User
-	err := interfaces.Context.GetDB().Where("username = ?", username).First(&user).Error
+	err := context.Context.GetDB().Where("username = ?", username).First(&user).Error
 	if err != nil {
 		c.Logger().Error(err)
 		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusNotFound, "User not found")
