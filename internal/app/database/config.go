@@ -107,11 +107,12 @@ func runMigrations(db *gorm.DB) {
 	var migrationPath string
 
 	currentDirectory, currentDirName := getCurrentDirectory()
+	fmt.Println("current", currentDirectory)
 
 	if currentDirName == "tests" {
-		migrationPath = filepath.Join("file://", currentDirectory, "..", "..", "database/migrations")
+		migrationPath = filepath.Join("file://", currentDirectory, "..", "..", "/internal/app/database/migrations")
 	} else {
-		migrationPath = filepath.Join("file://", currentDirectory, "database/migrations")
+		migrationPath = filepath.Join("file://", currentDirectory, "/internal/app/database/migrations")
 	}
 
 	driver, err := db_postgres.WithInstance(sqlDB, &db_postgres.Config{})
