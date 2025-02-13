@@ -6,12 +6,12 @@ import (
 	"github.com/cucumber/godog"
 	"github.com/go-testfixtures/testfixtures/v3"
 	"goproject/database"
+	contextpkg "goproject/interfaces"
 	"goproject/server"
 	"log"
 	"os"
 	"strings"
 	"testing"
-	contextpkg "goproject/context"
 )
 
 type DatabaseOperation string

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
-	"goproject/users"
+	contextpkg "goproject/interfaces"
 	"goproject/posts"
+	"goproject/users"
 	"goproject/utils"
 	"net/http"
-	contextpkg "goproject/context"
 )
 
 var baseURL = "http://localhost:8080"

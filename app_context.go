@@ -1,48 +1,37 @@
-package context
+package main
 
 import (
 	"goproject/database"
+	"goproject/interfaces"
 	"goproject/posts"
 	"goproject/users"
 	"gorm.io/gorm"
 	"log"
 )
 
-var Context ApplicationContext
-
-type ApplicationContext interface {
-	GetDB() *gorm.DB
-
-	GetUserRepository() users.UserRepository
-
-	GetUserService() users.UserService
-
-	GetPostRepository() posts.PostRepository
-}
-
 type applicationContextImpl struct {
 	db *gorm.DB
 
-	userRepository users.UserRepository
+	userRepository interfaces.UserRepository
 
-	userService users.UserService
+	userService interfaces.UserService
 
-	postRepository posts.PostRepository
+	postRepository interfaces.PostRepository
 }
 
 func (Context *applicationContextImpl) GetDB() *gorm.DB {
 	return Context.db
 }
 
-func (Context *applicationContextImpl) GetUserRepository() users.UserRepository {
+func (Context *applicationContextImpl) GetUserRepository() interfaces.UserRepository {
 	return Context.userRepository
 }
 
-func (Context *applicationContextImpl) GetUserService() users.UserService {
+func (Context *applicationContextImpl) GetUserService() interfaces.UserService {
 	return Context.userService
 }
 
-func (Context *applicationContextImpl) GetPostRepository() posts.PostRepository {
+func (Context *applicationContextImpl) GetPostRepository() interfaces.PostRepository {
 	return Context.postRepository
 }
 
@@ -59,7 +48,7 @@ func init() {
 	userService := users.NewUserService(userRepository)
 	postRepository := posts.NewPostRepository(db)
 
-	Context = &applicationContextImpl{
+	interfaces.Context = &applicationContextImpl{
 		db,
 		userRepository,
 		userService,

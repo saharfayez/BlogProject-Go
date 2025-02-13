@@ -3,8 +3,8 @@ package posts
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"goproject/context"
-	"goproject/users"
+	"goproject/interfaces"
+	"goproject/models"
 	"goproject/utils"
 	"net/http"
 )
@@ -12,9 +12,9 @@ import (
 func GetPosts(c echo.Context) error {
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	var posts []Post
+	var posts []models.Post
 
-	result := context.Context.GetDB().Find(&posts)
+	result := interfaces.Context.GetDB().Find(&posts)
 	if result.Error != nil {
 		return c.String(http.StatusInternalServerError, "Error querying posts")
 	}
@@ -26,19 +26,19 @@ func CreatePost(c echo.Context) error {
 
 	username := utils.GetTokenFromContext(c)
 
-	var user users.User
-	if err := context.Context.GetDB().Where("username = ?", username).First(&user).Error; err != nil {
+	var user models.User
+	if err := interfaces.Context.GetDB().Where("username = ?", username).First(&user).Error; err != nil {
 		return c.String(http.StatusNotFound, "User not found")
 	}
 
-	var post Post
+	var post models.Post
 	if err := c.Bind(&post); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
 	post.UserID = user.ID
 
-	if err := context.Context.GetDB().Create(&post).Error; err != nil {
+	if err := interfaces.Context.GetDB().Create(&post).Error; err != nil {
 		fmt.Println("Error creating post:", err)
 		return c.String(http.StatusInternalServerError, "Error creating post")
 	}
@@ -50,8 +50,8 @@ func GetPost(c echo.Context) error {
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	id := c.Param("id")
-	var post Post
-	result := context.Context.GetDB().First(&post, id)
+	var post models.Post
+	result := interfaces.Context.GetDB().First(&post, id)
 	if result.Error != nil {
 		return c.String(http.StatusNotFound, "Error getting post")
 	}
@@ -61,14 +61,14 @@ func GetPost(c echo.Context) error {
 func UpdatePost(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-	var user users.User
-	var post Post
+	var user models.User
+	var post models.Post
 	user, post, err := authorizePost(c)
 	if err != nil {
 		return err
 	}
 
-	var updatedPost Post
+	var updatedPost models.Post
 	if err := c.Bind(&updatedPost); err != nil {
 		return c.String(http.StatusBadRequest, "Error parsing body")
 	}
@@ -76,7 +76,7 @@ func UpdatePost(c echo.Context) error {
 	updatedPost.UserID = user.ID
 	updatedPost.ID = post.ID
 
-	if err := context.Context.GetDB().Save(&updatedPost).Error; err != nil {
+	if err := interfaces.Context.GetDB().Save(&updatedPost).Error; err != nil {
 		c.Logger().Error(err)
 		return c.String(http.StatusInternalServerError, "Error updating post")
 	}
@@ -92,34 +92,34 @@ func DeletePost(c echo.Context) error {
 		return err
 	}
 
-	var post Post
-	result := context.Context.GetDB().Delete(&post, id)
+	var post models.Post
+	result := interfaces.Context.GetDB().Delete(&post, id)
 	if result.Error != nil {
 		return c.String(http.StatusNotFound, "Error deleting post")
 	}
 	return c.String(http.StatusOK, "post deleted successfully")
 }
 
-func authorizePost(c echo.Context) (users.User, Post, error) {
+func authorizePost(c echo.Context) (models.User, models.Post, error) {
 	username := utils.GetTokenFromContext(c)
 	id := c.Param("id")
 
-	var post Post
-	if err := context.Context.GetDB().First(&post, id).Error; err != nil {
+	var post models.Post
+	if err := interfaces.Context.GetDB().First(&post, id).Error; err != nil {
 		c.Logger().Error(err)
-		return users.User{}, Post{}, echo.NewHTTPError(http.StatusNotFound, "Post not found")
+		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusNotFound, "Post not found")
 	}
 
-	var user users.User
-	err := context.Context.GetDB().Where("username = ?", username).First(&user).Error
+	var user models.User
+	err := interfaces.Context.GetDB().Where("username = ?", username).First(&user).Error
 	if err != nil {
 		c.Logger().Error(err)
-		return users.User{}, Post{}, echo.NewHTTPError(http.StatusNotFound, "User not found")
+		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusNotFound, "User not found")
 	}
 
 	if post.UserID != user.ID {
 		c.Logger().Error("User not authorized to update or delete this post")
-		return users.User{}, Post{}, echo.NewHTTPError(http.StatusUnauthorized, "User not authorized to update or delete this post")
+		return models.User{}, models.Post{}, echo.NewHTTPError(http.StatusUnauthorized, "User not authorized to update or delete this post")
 	}
 
 	return user, post, nil

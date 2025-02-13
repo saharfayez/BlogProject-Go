@@ -3,19 +3,16 @@ package users
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"goproject/interfaces"
+	"goproject/models"
 	"goproject/utils"
 )
 
-type UserService interface {
-	Signup(user *User) error
-	Login(username, password string) (string, error)
-}
-
 type userServiceImpl struct {
-	userRepo UserRepository
+	userRepo interfaces.UserRepository
 }
 
-func NewUserService(userRepo UserRepository) UserService {
+func NewUserService(userRepo interfaces.UserRepository) interfaces.UserService {
 	return &userServiceImpl{userRepo: userRepo}
 }
 
@@ -23,7 +20,7 @@ func (userServiceImpl *userServiceImpl) GetName() string {
 	return "UserService"
 }
 
-func (userServiceImpl *userServiceImpl) Signup(user *User) error {
+func (userServiceImpl *userServiceImpl) Signup(user *models.User) error {
 
 	existingUser, _ := userServiceImpl.userRepo.FindUserByUsername(user.Username)
 	if existingUser != nil {
@@ -52,8 +49,8 @@ func (userServiceImpl *userServiceImpl) Login(username, password string) (string
 	return utils.GenerateJWT(username)
 }
 
-func MapUserDtoToUser(userDto UserDto) User {
-	return User{
+func MapUserDtoToUser(userDto UserDto) models.User {
+	return models.User{
 		Username: userDto.Username,
 		Password: userDto.Password, // Password hashing should be handled separately
 	}
