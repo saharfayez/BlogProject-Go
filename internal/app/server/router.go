@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"goproject/internal/app/business/impl/posts"
 	"goproject/internal/app/business/impl/users"
-	appmiddleware "goproject/internal/app/middleware"
+	appMiddleware "goproject/internal/app/middleware"
 )
 
 func registerRoutes() *echo.Echo {
@@ -16,7 +16,7 @@ func registerRoutes() *echo.Echo {
 
 	e.Use(middleware.Logger())
 
-	protected := e.Group("/api", appmiddleware.JWTMiddleware())
+	protected := e.Group("/api", appMiddleware.JWTMiddleware())
 
 	protected.POST("/posts", posts.CreatePost)
 	//protected.GET("/posts", posts.GetPosts)

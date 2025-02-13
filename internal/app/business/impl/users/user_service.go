@@ -16,10 +16,6 @@ func NewUserService(userRepo users.UserRepository) users.UserService {
 	return &userServiceImpl{userRepo: userRepo}
 }
 
-func (userServiceImpl *userServiceImpl) GetName() string {
-	return "UserService"
-}
-
 func (userServiceImpl *userServiceImpl) Signup(user *models.User) error {
 
 	existingUser, _ := userServiceImpl.userRepo.FindUserByUsername(user.Username)
