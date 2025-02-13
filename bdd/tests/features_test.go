@@ -120,7 +120,7 @@ func TestFeatures(t *testing.T) {
 	opts := godog.Options{
 		Output: os.Stdout,
 		Format: "pretty", // or "progress" for a more compact output
-		Paths:  []string{"."},
+		Paths:  []string{"../features"},
 		//Tags:     godogTags, // use parsed tags
 		TestingT: t, // Integrate with go test
 	}
