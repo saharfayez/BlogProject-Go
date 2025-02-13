@@ -18,10 +18,10 @@ func registerRoutes() *echo.Echo {
 
 	protected := e.Group("/api", appmiddleware.JWTMiddleware())
 
-	protected.GET("/posts", posts.GetPosts)
 	protected.POST("/posts", posts.CreatePost)
-	protected.GET("/posts/:id", posts.GetPost)
-	protected.PUT("/posts/:id", posts.UpdatePost)
-	protected.DELETE("/posts/:id", posts.DeletePost)
+	//protected.GET("/posts", posts.GetPosts)
+	//protected.GET("/posts/:id", posts.GetPost)
+	//protected.PUT("/posts/:id", posts.UpdatePost)
+	//protected.DELETE("/posts/:id", posts.DeletePost)
 	return e
 }

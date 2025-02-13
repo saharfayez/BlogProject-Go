@@ -33,6 +33,7 @@ func Signup(c echo.Context) error {
 	return c.JSON(http.StatusCreated, signupResponse)
 }
 
+// TODO - refactor to use UserService
 func Login(c echo.Context) error {
 
 	var userDto UserDto
