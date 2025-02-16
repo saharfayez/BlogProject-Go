@@ -12,7 +12,6 @@ func Signup(c echo.Context) error {
 	if err := c.Bind(&userDto); err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
-
 	user := MapUserDtoToUser(userDto)
 
 	userService := context.Context.GetUserService()

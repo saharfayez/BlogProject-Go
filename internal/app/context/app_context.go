@@ -18,4 +18,6 @@ type ApplicationContext interface {
 	GetUserService() users.UserService
 
 	GetPostRepository() posts.PostRepository
+
+	GetPostService() posts.PostService
 }
