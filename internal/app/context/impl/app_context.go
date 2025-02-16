@@ -20,6 +20,8 @@ type applicationContextImpl struct {
 	userService users.UserService
 
 	postRepository posts.PostRepository
+
+	postService posts.PostService
 }
 
 func (Context *applicationContextImpl) GetPropertiesConfig() context.PropertiesConfig {
@@ -42,6 +44,10 @@ func (Context *applicationContextImpl) GetPostRepository() posts.PostRepository 
 	return Context.postRepository
 }
 
+func (Context *applicationContextImpl) GetPostService() posts.PostService {
+	return Context.postService
+}
+
 // this is called once by go before main
 func init() {
 
@@ -61,4 +67,7 @@ func init() {
 
 	postRepository := postsimpl.NewPostRepository(db)
 	appContext.postRepository = postRepository
+
+	postService := postsimpl.NewPostService(postRepository, userService)
+	appContext.postService = postService
 }

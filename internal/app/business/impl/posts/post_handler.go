@@ -9,25 +9,18 @@ import (
 	"net/http"
 )
 
-// TODO - refactor to use PostService
 func CreatePost(c echo.Context) error {
+
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	username := middleware.GetTokenFromContext(c)
-
-	var user models.User
-	if err := context.Context.GetDB().Where("username = ?", username).First(&user).Error; err != nil {
-		return c.String(http.StatusNotFound, "User not found")
-	}
 
 	var post models.Post
 	if err := c.Bind(&post); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	post.UserID = user.ID
-
-	if err := context.Context.GetDB().Create(&post).Error; err != nil {
+	if err := context.Context.GetPostService().CreatePost(username, &post); err != nil {
 		fmt.Println("Error creating post:", err)
 		return c.String(http.StatusInternalServerError, "Error creating post")
 	}
