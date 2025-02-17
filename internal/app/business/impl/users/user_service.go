@@ -23,7 +23,7 @@ func (userServiceImpl *userServiceImpl) FindUser(username string) (*models.User,
 func (userServiceImpl *userServiceImpl) Signup(user *models.User) error {
 
 	existingUser, _ := userServiceImpl.userRepo.FindUserByUsername(user.Username)
-	if existingUser != nil {
+	if existingUser == nil {
 		return errors.New("User already exists")
 	}
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -41,7 +41,7 @@ func (userServiceImpl *userServiceImpl) Login(username, password string) (string
 		return "", err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(password), []byte(existingUser.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(password))
 	if err != nil {
 		return "", err
 	}
@@ -52,6 +52,6 @@ func (userServiceImpl *userServiceImpl) Login(username, password string) (string
 func MapUserDtoToUser(userDto UserDto) models.User {
 	return models.User{
 		Username: userDto.Username,
-		Password: userDto.Password, // Password hashing should be handled separately
+		Password: userDto.Password,
 	}
 }
