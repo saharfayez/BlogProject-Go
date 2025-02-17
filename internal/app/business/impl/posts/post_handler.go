@@ -20,7 +20,8 @@ func CreatePost(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	if err := context.Context.GetPostService().CreatePost(username, &post); err != nil {
+	postService := context.Context.GetPostService()
+	if err := postService.CreatePost(username, &post); err != nil {
 		fmt.Println("Error creating post:", err)
 		return c.String(http.StatusInternalServerError, "Error creating post")
 	}
@@ -70,7 +71,7 @@ func CreatePost(c echo.Context) error {
 //	updatedPost.UserID = user.ID
 //	updatedPost.ID = post.ID
 //
-//	if err := context.Context.GetDB().Save(&updatedPost).Error; err != nil {
+//	if err := context.Context.GetDB().Create(&updatedPost).Error; err != nil {
 //		c.Logger().Error(err)
 //		return c.String(http.StatusInternalServerError, "Error updating post")
 //	}

@@ -26,7 +26,7 @@ func (postRepo *postRepositoryImpl) FindById(id int) (*models.Post, error) {
 	return &post, err
 }
 
-func (postRepo *postRepositoryImpl) Save(post *models.Post) error {
+func (postRepo *postRepositoryImpl) Create(post *models.Post) error {
 	return postRepo.db.Create(&post).Error
 }
 

@@ -21,5 +21,5 @@ func (postServiceImpl *postServiceImpl) CreatePost(username string, post *models
 		return err
 	}
 	post.UserID = user.ID
-	return postServiceImpl.postRepo.Save(post)
+	return postServiceImpl.postRepo.Create(post)
 }

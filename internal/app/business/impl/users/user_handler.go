@@ -35,8 +35,9 @@ func Login(c echo.Context) error {
 	if err := c.Bind(&userDto); err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
+	userService := context.Context.GetUserService()
 
-	token, err := context.Context.GetUserService().Login(userDto.Username, userDto.Password)
+	token, err := userService.Login(userDto.Username, userDto.Password)
 	if err != nil {
 		c.Logger().Error(err)
 		return c.String(http.StatusInternalServerError, "Error generating token")
