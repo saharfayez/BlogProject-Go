@@ -7,8 +7,8 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	appcontext "goproject/internal/app/context"
 	_ "goproject/internal/app/context/impl"
-	"goproject/internal/app/database"
 	"goproject/internal/app/server"
+	"goproject/test/utils"
 	"log"
 	"os"
 	"strings"
@@ -111,7 +111,7 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 		go server.Serve()
 	})
 	context.AfterSuite(func() {
-		database.ShutDownTestContainer()
+		utils.ShutDownTestContainer()
 	})
 }
 
