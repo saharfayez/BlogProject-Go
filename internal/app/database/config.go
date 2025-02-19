@@ -1,14 +1,11 @@
 package database
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	db_postgres "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
 	appcontext "goproject/internal/app/context"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,8 +13,6 @@ import (
 	"os"
 	"path/filepath"
 )
-
-var ShutDownTestContainer func()
 
 func InitDB() (*gorm.DB, error) {
 	var err error
@@ -27,77 +22,16 @@ func InitDB() (*gorm.DB, error) {
 		log.Fatal("Error connecting to the database: ", err)
 	}
 
-	runMigrations(db)
+	RunMigrations(db)
 
 	return db, nil
 }
 
 func getDB() gorm.Dialector {
-	if appcontext.Context.GetPropertiesConfig().GetProfile() != "test" {
-		return postgres.Open(appcontext.Context.GetPropertiesConfig().GetDatabaseUrl())
-	} else {
-		// Fallback to PostgreSQL Testcontainer
-		ctx := context.Background()
-		dsn, err := startTestContainer(ctx)
-		if err != nil {
-			panic(fmt.Sprintf("Failed to start PostgreSQL container: %v", err))
-		}
-		return postgres.Open(dsn)
-	}
+	return postgres.Open(appcontext.Context.GetPropertiesConfig().GetDatabaseUrl())
 }
 
-func startTestContainer(ctx context.Context) (string, error) {
-	var env = map[string]string{
-		"POSTGRES_PASSWORD": "postgres",
-		"POSTGRES_USER":     "postgres",
-		"POSTGRES_DB":       "postgres",
-	}
-	var port = "5432/tcp"
-	// Define the PostgreSQL container request
-	req := testcontainers.ContainerRequest{
-		Image:        "postgres:15-alpine",
-		ExposedPorts: []string{port},
-		Env:          env,
-		WaitingFor:   wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
-	}
-
-	// Start the PostgreSQL container
-	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-
-	if err != nil {
-		return "", fmt.Errorf("Failed to start PostgreSQL container: %v", err)
-	}
-
-	// Get the host and port of the PostgreSQL container
-	_, err = container.Host(ctx)
-	if err != nil {
-		return "", fmt.Errorf("failed to get PostgreSQL container host: %v", err)
-	}
-
-	mappedPort, err := container.MappedPort(ctx, "5432")
-	if err != nil {
-		return "", fmt.Errorf("failed to get PostgreSQL container port: %v", err)
-	}
-	fmt.Printf("PORT NUMBER: %d", mappedPort.Port())
-
-	//time.Sleep(5 * time.Second)
-	// Construct the connection string for GORM
-
-	dsn := fmt.Sprintf("host=127.0.0.1 user=postgres password=postgres dbname=postgres port=%s sslmode=disable TimeZone=Asia/Jakarta",
-		mappedPort.Port())
-
-	ShutDownTestContainer = func() {
-		if err := container.Terminate(ctx); err != nil {
-			fmt.Printf("Failed to terminate PostgreSQL container: %v\n", err)
-		}
-	}
-	return dsn, nil
-}
-
-func runMigrations(db *gorm.DB) {
+func RunMigrations(db *gorm.DB) {
 	sqlDB, _ := db.DB()
 
 	var migration *migrate.Migrate
