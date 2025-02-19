@@ -7,6 +7,7 @@ import (
 	"goproject/internal/app/business/interfaces/users"
 	"goproject/internal/app/context"
 	"goproject/internal/app/database"
+	testdatabase "goproject/test/database"
 	"gorm.io/gorm"
 )
 
@@ -51,12 +52,19 @@ func (Context *applicationContextImpl) GetPostService() posts.PostService {
 // this is called once by go before main
 func init() {
 
-	propertiesConf := newPropertiesConfig()
+	//propertiesConf := newPropertiesConfig()
 
-	appContext := &applicationContextImpl{propertiesConfig: propertiesConf}
+	appContext := &applicationContextImpl{propertiesConfig: newPropertiesConfig()}
 	context.Context = appContext
 
-	db, _ := database.InitDB()
+	var db *gorm.DB
+
+	if context.Context.GetPropertiesConfig().GetProfile() != "test" {
+		db, _ = database.InitDB()
+	} else {
+		db, _ = testdatabase.InitDB()
+	}
+
 	appContext.db = db
 
 	userRepository := usersimpl.NewUserRepository(db)

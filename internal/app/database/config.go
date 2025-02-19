@@ -1,14 +1,12 @@
 package database
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	db_postgres "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	appcontext "goproject/internal/app/context"
-	"goproject/test/utils"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -24,26 +22,16 @@ func InitDB() (*gorm.DB, error) {
 		log.Fatal("Error connecting to the database: ", err)
 	}
 
-	runMigrations(db)
+	RunMigrations(db)
 
 	return db, nil
 }
 
 func getDB() gorm.Dialector {
-	if appcontext.Context.GetPropertiesConfig().GetProfile() != "test" {
-		return postgres.Open(appcontext.Context.GetPropertiesConfig().GetDatabaseUrl())
-	} else {
-		// Fallback to PostgreSQL Testcontainer
-		ctx := context.Background()
-		dsn, err := utils.StartTestContainer(ctx)
-		if err != nil {
-			panic(fmt.Sprintf("Failed to start PostgreSQL container: %v", err))
-		}
-		return postgres.Open(dsn)
-	}
+	return postgres.Open(appcontext.Context.GetPropertiesConfig().GetDatabaseUrl())
 }
 
-func runMigrations(db *gorm.DB) {
+func RunMigrations(db *gorm.DB) {
 	sqlDB, _ := db.DB()
 
 	var migration *migrate.Migrate

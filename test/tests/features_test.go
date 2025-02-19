@@ -8,7 +8,7 @@ import (
 	appcontext "goproject/internal/app/context"
 	_ "goproject/internal/app/context/impl"
 	"goproject/internal/app/server"
-	"goproject/test/utils"
+	"goproject/test/database"
 	"log"
 	"os"
 	"strings"
@@ -111,7 +111,7 @@ func InitializeTestSuite(context *godog.TestSuiteContext) {
 		go server.Serve()
 	})
 	context.AfterSuite(func() {
-		utils.ShutDownTestContainer()
+		database.ShutDownTestContainer()
 	})
 }
 

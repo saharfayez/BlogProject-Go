@@ -1,15 +1,43 @@
-package utils
+package database
 
 import (
 	"context"
 	"fmt"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"goproject/internal/app/database"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"log"
 )
 
 var ShutDownTestContainer func()
 
-func StartTestContainer(ctx context.Context) (string, error) {
+func InitDB() (*gorm.DB, error) {
+	var err error
+
+	db, err := gorm.Open(getDB(), &gorm.Config{})
+	if err != nil {
+		log.Fatal("Error connecting to the database: ", err)
+	}
+
+	database.RunMigrations(db)
+
+	return db, nil
+}
+
+func getDB() gorm.Dialector {
+
+	// Fallback to PostgreSQL Testcontainer
+	ctx := context.Background()
+	dsn, err := startTestContainer(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to start PostgreSQL container: %v", err))
+	}
+	return postgres.Open(dsn)
+}
+
+func startTestContainer(ctx context.Context) (string, error) {
 	var env = map[string]string{
 		"POSTGRES_PASSWORD": "postgres",
 		"POSTGRES_USER":     "postgres",
