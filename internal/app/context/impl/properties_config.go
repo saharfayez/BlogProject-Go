@@ -1,11 +1,14 @@
 package impl
 
 import (
-	"github.com/joho/godotenv"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 	"goproject/internal/app/context"
 	"log"
-	"os"
 )
+
+var k = koanf.New(".")
 
 type propertiesConfig struct {
 	profile     string
@@ -13,13 +16,14 @@ type propertiesConfig struct {
 }
 
 func newPropertiesConfig() context.PropertiesConfig {
-	err := godotenv.Load(".env")
+
+	err := k.Load(file.Provider("config.yaml"), yaml.Parser())
 	if err != nil {
-		log.Fatal("Failed to load env: ", err)
+		log.Fatal(err)
 	}
 
-	profile, _ := os.LookupEnv("profile")
-	databaseUrl, _ := os.LookupEnv("database_url")
+	profile := k.String("profile")
+	databaseUrl := k.String("database_url")
 
 	return &propertiesConfig{
 		profile,
