@@ -22,8 +22,8 @@ func newPropertiesConfig() context.PropertiesConfig {
 		log.Fatal(err)
 	}
 
-	profile := k.String("profile")
-	databaseUrl := k.String("database_url")
+	profile := k.String("app.profile")
+	databaseUrl := k.String("database.url")
 
 	return &propertiesConfig{
 		profile,

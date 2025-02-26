@@ -1,2 +1,5 @@
-profile: "dev"
-database_url: "postgres://hanaaahmed:root@127.0.0.1:5432/postgres"
+app:
+  profile: "dev"
+
+database:
+  url: "postgres://hanaaahmed:root@127.0.0.1:5432/postgres"
