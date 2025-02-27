@@ -3,12 +3,16 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"goproject/internal/app/database"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
+	"testing"
 )
 
 var ShutDownTestContainer func()
@@ -86,4 +90,26 @@ func startTestContainer(ctx context.Context) (string, error) {
 		}
 	}
 	return dsn, nil
+}
+
+func Config(mainConfig *koanf.Koanf) *koanf.Koanf {
+
+	if testing.Testing() {
+		fmt.Println("we run tests")
+
+		testConfig := koanf.New(".")
+		testConfigPath := "config.yaml"
+
+		err := testConfig.Load(file.Provider(testConfigPath), yaml.Parser())
+		if err != nil {
+			log.Printf("no testConfig config found at %s: %v", testConfigPath, err)
+		}
+
+		if err = mainConfig.Merge(testConfig); err != nil {
+			log.Fatalf("error merging testConfig config: %v", err)
+		}
+	} else {
+		fmt.Println("we are in normal mode")
+	}
+	return mainConfig
 }

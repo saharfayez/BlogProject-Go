@@ -1,13 +1,12 @@
 package impl
 
 import (
-	"fmt"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
 	"goproject/internal/app/context"
+	testdatabase "goproject/test/database"
 	"log"
-	"testing"
 )
 
 type propertiesConfig struct {
@@ -24,23 +23,7 @@ func newPropertiesConfig() context.PropertiesConfig {
 		log.Fatal(err)
 	}
 
-	if testing.Testing() {
-		fmt.Println("we run tests")
-
-		testConfig := koanf.New(".")
-		testConfigPath := "config.yaml"
-
-		err = testConfig.Load(file.Provider(testConfigPath), yaml.Parser())
-		if err != nil {
-			log.Printf("no testConfig config found at %s: %v", testConfigPath, err)
-		}
-
-		if err = mainConfig.Merge(testConfig); err != nil {
-			log.Fatalf("error merging testConfig config: %v", err)
-		}
-	} else {
-		fmt.Println("we are in normal mode")
-	}
+	mainConfig = testdatabase.Config(mainConfig)
 
 	profile := mainConfig.String("app.profile")
 	databaseUrl := mainConfig.String("database.url")
