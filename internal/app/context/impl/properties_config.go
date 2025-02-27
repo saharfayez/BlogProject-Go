@@ -7,6 +7,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"goproject/internal/app/context"
 	"log"
+	"testing"
 )
 
 type propertiesConfig struct {
@@ -15,36 +16,34 @@ type propertiesConfig struct {
 }
 
 func newPropertiesConfig() context.PropertiesConfig {
-	k := koanf.New(".")
+	mainConfig := koanf.New(".")
+	mainConfigPath := "../../cmd/goproject/config.yaml"
 
-	err := k.Load(file.Provider("../../cmd/goproject/config.yaml"), yaml.Parser())
+	err := mainConfig.Load(file.Provider(mainConfigPath), yaml.Parser())
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("profile after load main", k.String("app.profile"))
-	fmt.Println("databaseUrl after load main", k.String("database.url"))
+	if testing.Testing() {
+		fmt.Println("we run tests")
 
-	override := koanf.New(".")
-	overridePath := "config.yaml"
+		testConfig := koanf.New(".")
+		testConfigPath := "config.yaml"
 
-	err = override.Load(file.Provider(overridePath), yaml.Parser())
-	if err != nil {
-		log.Printf("no override config found at %s: %v", overridePath, err)
+		err = testConfig.Load(file.Provider(testConfigPath), yaml.Parser())
+		if err != nil {
+			log.Printf("no testConfig config found at %s: %v", testConfigPath, err)
+		}
+
+		if err = mainConfig.Merge(testConfig); err != nil {
+			log.Fatalf("error merging testConfig config: %v", err)
+		}
+	} else {
+		fmt.Println("we are in normal mode")
 	}
 
-	fmt.Println("profile after load override", override.String("app.profile"))
-	fmt.Println("databaseUrl after load override", override.String("database.url"))
-
-	if err = k.Merge(override); err != nil {
-		log.Fatalf("error merging override config: %v", err)
-	}
-
-	profile := k.String("app.profile")
-	databaseUrl := k.String("database.url")
-
-	fmt.Println("profile after merge", profile)
-	fmt.Println("databaseUrl after merge", databaseUrl)
+	profile := mainConfig.String("app.profile")
+	databaseUrl := mainConfig.String("database.url")
 
 	return &propertiesConfig{
 		profile,
