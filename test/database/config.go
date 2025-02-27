@@ -92,10 +92,9 @@ func startTestContainer(ctx context.Context) (string, error) {
 	return dsn, nil
 }
 
-func Config(mainConfig *koanf.Koanf) *koanf.Koanf {
+func MergeConfigFiles(mainConfig *koanf.Koanf) *koanf.Koanf {
 
 	if testing.Testing() {
-		fmt.Println("we run tests")
 
 		testConfig := koanf.New(".")
 		testConfigPath := "config.yaml"
@@ -108,8 +107,7 @@ func Config(mainConfig *koanf.Koanf) *koanf.Koanf {
 		if err = mainConfig.Merge(testConfig); err != nil {
 			log.Fatalf("error merging testConfig config: %v", err)
 		}
-	} else {
-		fmt.Println("we are in normal mode")
 	}
+
 	return mainConfig
 }

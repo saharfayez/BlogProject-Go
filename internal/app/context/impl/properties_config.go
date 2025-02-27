@@ -10,8 +10,8 @@ import (
 )
 
 type propertiesConfig struct {
-	profile     string
-	databaseUrl string
+	Profile     string `koanf:"app.profile"`
+	DatabaseUrl string `koanf:"database.url"`
 }
 
 func newPropertiesConfig() context.PropertiesConfig {
@@ -23,21 +23,22 @@ func newPropertiesConfig() context.PropertiesConfig {
 		log.Fatal(err)
 	}
 
-	mainConfig = testdatabase.Config(mainConfig)
+	mainConfig = testdatabase.MergeConfigFiles(mainConfig)
 
-	profile := mainConfig.String("app.profile")
-	databaseUrl := mainConfig.String("database.url")
+	var propConfig propertiesConfig
 
-	return &propertiesConfig{
-		profile,
-		databaseUrl,
+	err = mainConfig.UnmarshalWithConf("", &propConfig, koanf.UnmarshalConf{Tag: "koanf", FlatPaths: true})
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	return &propConfig
 }
 
 func (config *propertiesConfig) GetProfile() string {
-	return config.profile
+	return config.Profile
 }
 
 func (config *propertiesConfig) GetDatabaseUrl() string {
-	return config.databaseUrl
+	return config.DatabaseUrl
 }
