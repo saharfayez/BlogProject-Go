@@ -9,6 +9,7 @@ import (
 	"goproject/internal/app/database"
 	testdatabase "goproject/test/database"
 	"gorm.io/gorm"
+	"testing"
 )
 
 type applicationContextImpl struct {
@@ -52,14 +53,12 @@ func (Context *applicationContextImpl) GetPostService() posts.PostService {
 // this is called once by go before main
 func init() {
 
-	//propertiesConf := newPropertiesConfig()
-
 	appContext := &applicationContextImpl{propertiesConfig: newPropertiesConfig()}
 	context.Context = appContext
 
 	var db *gorm.DB
 
-	if context.Context.GetPropertiesConfig().GetProfile() != "test" {
+	if !testing.Testing() {
 		db, _ = database.InitDB()
 	} else {
 		db, _ = testdatabase.InitDB()

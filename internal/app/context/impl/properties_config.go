@@ -1,36 +1,58 @@
 package impl
 
 import (
-	"github.com/joho/godotenv"
+	"fmt"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 	"goproject/internal/app/context"
+	"goproject/test/config"
 	"log"
-	"os"
+	"testing"
 )
 
 type propertiesConfig struct {
-	profile     string
-	databaseUrl string
+	Profile     string `koanf:"app.profile"`
+	DatabaseUrl string `koanf:"database.url"`
 }
 
 func newPropertiesConfig() context.PropertiesConfig {
-	err := godotenv.Load(".env")
+	mainConfig := koanf.New(".")
+	mainConfigPath := "../../cmd/goproject/config.yaml"
+
+	err := mainConfig.Load(file.Provider(mainConfigPath), yaml.Parser())
 	if err != nil {
-		log.Fatal("Failed to load env: ", err)
+		log.Fatalf("no mainConfig found at %s: %v", mainConfigPath, err)
 	}
 
-	profile, _ := os.LookupEnv("profile")
-	databaseUrl, _ := os.LookupEnv("database_url")
+	profile := mainConfig.String("app.profile")
 
-	return &propertiesConfig{
-		profile,
-		databaseUrl,
+	fmt.Println("profile after main", profile)
+
+	if testing.Testing() {
+		mainConfig = config.LoadProperties(mainConfig)
 	}
+
+	profile = mainConfig.String("app.profile")
+	databaseURL := mainConfig.String("database.url")
+
+	fmt.Println("profile after merge", profile)
+	fmt.Println("databaseURL after merge", databaseURL)
+
+	var propConfig propertiesConfig
+
+	err = mainConfig.UnmarshalWithConf("", &propConfig, koanf.UnmarshalConf{Tag: "koanf", FlatPaths: true})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &propConfig
 }
 
 func (config *propertiesConfig) GetProfile() string {
-	return config.profile
+	return config.Profile
 }
 
 func (config *propertiesConfig) GetDatabaseUrl() string {
-	return config.databaseUrl
+	return config.DatabaseUrl
 }
