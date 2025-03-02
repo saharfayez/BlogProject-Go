@@ -23,6 +23,9 @@ func newPropertiesConfig() context.PropertiesConfig {
 	if err != nil {
 		log.Fatal(err)
 	}
+	profile := mainConfig.String("app.profile")
+
+	fmt.Println("profile after main", profile)
 
 	if testing.Testing() {
 		fmt.Println("we run tests")
@@ -35,10 +38,17 @@ func newPropertiesConfig() context.PropertiesConfig {
 			log.Printf("no testConfig config found at %s: %v", testConfigPath, err)
 		}
 
+		fmt.Println("profile after test", testConfig.String("app.profile"))
+
 		if err = mainConfig.Merge(testConfig); err != nil {
 			log.Fatalf("error merging testConfig config: %v", err)
 		}
 	}
+
+	profile = mainConfig.String("app.profile")
+
+	fmt.Println("profile after merge", profile)
+	fmt.Println("database after merge", mainConfig.String("database.url"))
 
 	var propConfig propertiesConfig
 
