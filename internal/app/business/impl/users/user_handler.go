@@ -33,14 +33,13 @@ func Login(c echo.Context) error {
 
 	var userDto UserDto
 	if err := c.Bind(&userDto); err != nil {
-		return c.String(http.StatusBadRequest, "bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	userService := context.Context.GetUserService()
 
 	token, err := userService.Login(userDto.Username, userDto.Password)
 	if err != nil {
-		c.Logger().Error(err)
-		return c.String(http.StatusInternalServerError, "Error generating token")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	loginResponse := LoginResponseDto{

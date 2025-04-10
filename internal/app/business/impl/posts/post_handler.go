@@ -1,11 +1,11 @@
 package posts
 
 import (
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"goproject/internal/app/context"
 	middleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
+	"log"
 	"net/http"
 )
 
@@ -17,13 +17,18 @@ func CreatePost(c echo.Context) error {
 
 	var post models.Post
 	if err := c.Bind(&post); err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		log.Println("Error binding post: ", err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	if post.Title == "" || post.Content == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "title and content are required")
 	}
 
 	postService := context.Context.GetPostService()
 	if err := postService.CreatePost(username, &post); err != nil {
-		fmt.Println("Error creating post:", err)
-		return c.String(http.StatusInternalServerError, "Error creating post")
+		log.Println("Error creating post:", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusCreated, post)

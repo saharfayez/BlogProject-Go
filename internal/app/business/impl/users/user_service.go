@@ -6,6 +6,7 @@ import (
 	"goproject/internal/app/business/interfaces/users"
 	middleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
+	"log"
 )
 
 type userServiceImpl struct {
@@ -38,11 +39,13 @@ func (userServiceImpl *userServiceImpl) Login(username, password string) (string
 
 	existingUser, err := userServiceImpl.userRepo.FindUserByUsername(username)
 	if err != nil {
+		log.Println("user service log:", err.Error())
 		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(password))
 	if err != nil {
+		log.Println("user service log passwords:", err.Error())
 		return "", err
 	}
 

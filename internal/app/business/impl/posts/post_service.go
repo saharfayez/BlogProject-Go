@@ -4,6 +4,7 @@ import (
 	"goproject/internal/app/business/interfaces/posts"
 	"goproject/internal/app/business/interfaces/users"
 	"goproject/internal/app/models"
+	"log"
 )
 
 type postServiceImpl struct {
@@ -18,6 +19,7 @@ func NewPostService(postRepo posts.PostRepository, userService users.UserService
 func (postServiceImpl *postServiceImpl) CreatePost(username string, post *models.Post) error {
 	user, err := postServiceImpl.userService.FindUser(username)
 	if err != nil {
+		log.Println("post service :", err)
 		return err
 	}
 	post.UserID = user.ID

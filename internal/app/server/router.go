@@ -11,10 +11,20 @@ import (
 func registerRoutes() *echo.Echo {
 	e := echo.New()
 
+	// zap
+	//zapLogger, _ := zap.NewProduction()
+	//e.Use(appMiddleware.ZapLoggerMiddleware(zapLogger))
+
+	// slog
+	//slogLogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	//e.Use(appMiddleware.SlogLoggerMiddleware(slogLogger))
+
+	e.Use(middleware.BodyDump(func(c echo.Context, reqBody, resBody []byte) {
+		c.Set("responseBody", string(resBody))
+	}))
+
 	e.POST("/signup", users.Signup)
 	e.POST("/login", users.Login)
-
-	e.Use(middleware.Logger())
 
 	protected := e.Group("/api", appMiddleware.JWTMiddleware())
 
