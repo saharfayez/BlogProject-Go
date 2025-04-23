@@ -10,18 +10,15 @@ var JwtSecret = []byte("your_secret_key")
 
 type Claims struct {
 	Username string `json:"username"`
+	Role     string `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func (c Claims) Valid() error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(username, role string) (string, error) {
 	expirationTime := time.Now().Add(1000 * time.Hour)
 	claims := &Claims{
 		Username: username,
+		Role:     role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -31,8 +28,14 @@ func GenerateJWT(username string) (string, error) {
 	return token.SignedString(JwtSecret)
 }
 
-func GetTokenFromContext(c echo.Context) string {
+func GetUsernameFromToken(c echo.Context) string {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(*Claims)
 	return claims.Username
+}
+
+func GetRoleFromToken(c echo.Context) string {
+	token := c.Get("user").(*jwt.Token)
+	claims := token.Claims.(*Claims)
+	return claims.Role
 }

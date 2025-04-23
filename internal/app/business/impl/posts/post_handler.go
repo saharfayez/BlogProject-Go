@@ -13,7 +13,7 @@ func CreatePost(c echo.Context) error {
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-	username := middleware.GetTokenFromContext(c)
+	username := middleware.GetUsernameFromToken(c)
 
 	var post models.Post
 	if err := c.Bind(&post); err != nil {
@@ -101,7 +101,7 @@ func CreatePost(c echo.Context) error {
 //}
 
 //func authorizePost(c echo.Context) (models.User, models.Post, error) {
-//	username := middleware.GetTokenFromContext(c)
+//	username := middleware.GetUsernameFromToken(c)
 //	id := c.Param("id")
 //
 //	var post models.Post

@@ -49,7 +49,9 @@ func (userServiceImpl *userServiceImpl) Login(username, password string) (string
 		return "", err
 	}
 
-	return middleware.GenerateJWT(username)
+	role := existingUser.Role
+
+	return middleware.GenerateJWT(username, role)
 }
 
 func MapUserDtoToUser(userDto UserDto) models.User {

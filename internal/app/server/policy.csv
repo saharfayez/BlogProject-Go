@@ -1,0 +1,5 @@
+# user_admin / admin  ----> roles
+p, user_admin, /api/posts, POST
+g, admin, user_admin
+
+
