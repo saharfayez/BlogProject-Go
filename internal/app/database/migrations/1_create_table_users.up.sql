@@ -1,4 +1,4 @@
-CREATE TABLE "users"
+CREATE TABLE app.users
 (
     "id"       SERIAL PRIMARY KEY,
     "username" VARCHAR(50),

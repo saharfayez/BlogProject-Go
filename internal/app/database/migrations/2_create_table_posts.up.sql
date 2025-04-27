@@ -1,4 +1,4 @@
-create table "posts"
+create table app.posts
 (
     "id"      SERIAL PRIMARY KEY,
     "title"   varchar(50),
