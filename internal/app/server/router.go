@@ -27,6 +27,7 @@ func registerRoutes() *echo.Echo {
 	e.POST("/login", users.Login)
 
 	protected := e.Group("/api", appMiddleware.JWTMiddleware())
+	protected.Use(appMiddleware.RBACMiddleware())
 
 	protected.POST("/posts", posts.CreatePost)
 	//protected.GET("/posts", posts.GetPosts)

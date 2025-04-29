@@ -49,7 +49,7 @@ func (userServiceImpl *userServiceImpl) Login(username, password string) (string
 		return "", err
 	}
 
-	return middleware.GenerateJWT(username)
+	return middleware.GenerateJWT(username, existingUser.Roles)
 }
 
 func MapUserDtoToUser(userDto UserDto) models.User {

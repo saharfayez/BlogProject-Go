@@ -16,7 +16,7 @@ func NewUserRepository(db *gorm.DB) users.UserRepository {
 
 func (userRepo *userRepositoryImpl) FindUserByUsername(username string) (*models.User, error) {
 	var user models.User
-	err := userRepo.db.Where("username = ?", username).First(&user).Error
+	err := userRepo.db.Preload("Roles.Permissions.Resources").Where("username = ?", username).First(&user).Error
 	return &user, err
 }
 
