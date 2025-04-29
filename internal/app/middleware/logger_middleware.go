@@ -19,19 +19,17 @@ func ZapLoggerMiddleware(zapLogger *zap.Logger) echo.MiddlewareFunc {
 		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
 
-			responseBody := c.Get("responseBody")
-			var responseJSON interface{}
+			responseBody := c.Get("responseBody").(string)
+			rawJson := json.RawMessage(responseBody)
 
 			if v.Error == nil {
-				if bodyStr, ok := responseBody.(string); ok {
-					if err := json.Unmarshal([]byte(bodyStr), &responseJSON); err == nil {
-						zapLogger.Info("request",
-							zap.String("URI", v.URI),
-							zap.Int("status", v.Status),
-							zap.Any("response", responseJSON),
-						)
-					}
-				}
+				zapLogger.Info("Request",
+					zap.String("URI", v.URI),
+					zap.Int("status", v.Status),
+					zap.Any("response", rawJson),
+					//zap.String("response", responseBody),
+				)
+
 			} else {
 				fmt.Println("v.Error content: ", v.Error)
 
