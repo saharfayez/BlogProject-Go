@@ -13,7 +13,8 @@ func CreatePost(c echo.Context) error {
 
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-	username := middleware.GetUsernameFromToken(c)
+	token := middleware.GetTokenFromContext(c)
+	username := middleware.GetUsernameFromToken(token)
 
 	var post models.Post
 	if err := c.Bind(&post); err != nil {

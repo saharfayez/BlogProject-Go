@@ -28,14 +28,16 @@ func GenerateJWT(username, role string) (string, error) {
 	return token.SignedString(JwtSecret)
 }
 
-func GetUsernameFromToken(c echo.Context) string {
+func GetTokenFromContext(c echo.Context) *Claims {
 	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(*Claims)
+	return claims
+}
+
+func GetUsernameFromToken(claims *Claims) string {
 	return claims.Username
 }
 
-func GetRoleFromToken(c echo.Context) string {
-	token := c.Get("user").(*jwt.Token)
-	claims := token.Claims.(*Claims)
+func GetRoleFromToken(claims *Claims) string {
 	return claims.Role
 }

@@ -1,5 +1,5 @@
-# user_admin / admin  ----> roles
-p, user_admin, /api/posts, POST
-g, admin, user_admin
+p, role_admin, /api/posts, POST
+g, admin, role_admin
+
 
 

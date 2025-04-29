@@ -1,4 +1,4 @@
-create table "posts"
+create table public.posts
 (
     "id"      SERIAL PRIMARY KEY,
     "title"   varchar(50),
