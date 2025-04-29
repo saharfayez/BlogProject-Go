@@ -18,6 +18,7 @@ func ZapLoggerMiddleware(zapLogger *zap.Logger) echo.MiddlewareFunc {
 		LogError:    true,
 		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
 		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+
 			responseBody := c.Get("responseBody")
 			var responseJSON interface{}
 
