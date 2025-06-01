@@ -50,13 +50,14 @@ func ZapLoggerMiddleware(zapLogger *zap.Logger) echo.MiddlewareFunc {
 
 			if err != nil {
 				zapLogger.Error("Request error",
-					zap.String("method", method),
-					zap.String("uri", uri),
-					zap.Int("status", status),
-					zap.Error(err),
-					zap.Any("response", rawJson),
-					zap.ByteString("debug", debug.Stack()),
+					zap.String("method", c.Request().Method),
+					zap.String("uri", c.Request().RequestURI),
+					zap.Int("status", c.Response().Status),
+					//	zap.Any("log error with Any", err),
+					//	zap.Error(err),
+					zap.String("log error with fmt", fmt.Sprintf("%+v", err)),
 				)
+
 			} else {
 				zapLogger.Info("Request success",
 					zap.String("method", method),

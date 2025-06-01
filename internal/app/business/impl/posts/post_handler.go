@@ -5,30 +5,24 @@ import (
 	"goproject/internal/app/context"
 	middleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
-	"log"
 	"net/http"
 )
 
 func CreatePost(c echo.Context) error {
-
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 	username := middleware.GetTokenFromContext(c)
 
 	var post models.Post
 	if err := c.Bind(&post); err != nil {
-		log.Println("Error binding post: ", err)
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	if post.Title == "" || post.Content == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "title and content are required")
+		_ = c.JSON(http.StatusBadRequest, "invalid post data")
+		return err
 	}
 
 	postService := context.Context.GetPostService()
 	if err := postService.CreatePost(username, &post); err != nil {
-		log.Println("Error creating post:", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		_ = c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message": "create post failed",
+		})
+		return err
 	}
 
 	return c.JSON(http.StatusCreated, post)

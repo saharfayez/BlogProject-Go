@@ -1,6 +1,7 @@
 package users
 
 import (
+	"github.com/pkg/errors"
 	"goproject/internal/app/business/interfaces/users"
 	"goproject/internal/app/models"
 	"gorm.io/gorm"
@@ -17,7 +18,10 @@ func NewUserRepository(db *gorm.DB) users.UserRepository {
 func (userRepo *userRepositoryImpl) FindUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	err := userRepo.db.Where("username = ?", username).First(&user).Error
-	return &user, err
+	if err != nil {
+		return nil, errors.Wrap(err, "user not found")
+	}
+	return &user, nil
 }
 
 func (userRepo *userRepositoryImpl) Save(user *models.User) error {

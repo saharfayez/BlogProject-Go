@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"github.com/pkg/errors"
 	"goproject/internal/app/business/interfaces/posts"
 	"goproject/internal/app/models"
 	"gorm.io/gorm"
@@ -27,7 +28,8 @@ func (postRepo *postRepositoryImpl) FindById(id int) (*models.Post, error) {
 }
 
 func (postRepo *postRepositoryImpl) Create(post *models.Post) error {
-	return postRepo.db.Create(&post).Error
+	err := postRepo.db.Create(post).Error
+	return errors.Wrap(err, "post creation failed")
 }
 
 func (postRepo *postRepositoryImpl) DeleteById(id int) error {
