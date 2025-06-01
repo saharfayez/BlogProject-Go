@@ -10,7 +10,8 @@ func Signup(c echo.Context) error {
 
 	var userDto UserDto
 	if err := c.Bind(&userDto); err != nil {
-		return c.String(http.StatusBadRequest, "bad request")
+		_ = c.String(http.StatusBadRequest, err.Error())
+		return err
 	}
 	user := MapUserDtoToUser(userDto)
 
@@ -18,7 +19,8 @@ func Signup(c echo.Context) error {
 
 	err := userService.Signup(&user)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		_ = c.String(http.StatusInternalServerError, err.Error())
+		return err
 	}
 
 	var signupResponse SignUpResponseDto

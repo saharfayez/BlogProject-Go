@@ -13,15 +13,13 @@ func CreatePost(c echo.Context) error {
 
 	var post models.Post
 	if err := c.Bind(&post); err != nil {
-		_ = c.JSON(http.StatusBadRequest, "invalid post data")
+		_ = c.JSON(http.StatusBadRequest, err.Error())
 		return err
 	}
 
 	postService := context.Context.GetPostService()
 	if err := postService.CreatePost(username, &post); err != nil {
-		_ = c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "create post failed",
-		})
+		_ = c.JSON(http.StatusInternalServerError, err.Error())
 		return err
 	}
 

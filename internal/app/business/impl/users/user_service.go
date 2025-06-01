@@ -1,7 +1,7 @@
 package users
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"goproject/internal/app/business/interfaces/users"
 	middleware "goproject/internal/app/middleware"
@@ -23,16 +23,20 @@ func (userServiceImpl *userServiceImpl) FindUser(username string) (*models.User,
 
 func (userServiceImpl *userServiceImpl) Signup(user *models.User) error {
 
-	existingUser, _ := userServiceImpl.userRepo.FindUserByUsername(user.Username)
-	if existingUser == nil {
-		return errors.New("User already exists")
+	_, err := userServiceImpl.userRepo.FindUserByUsername(user.Username)
+	if err == nil {
+		return errors.New("user already exists")
 	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
+	hashedPassword, hashError := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if hashError != nil {
+		return hashError
 	}
 	user.Password = string(hashedPassword)
-	return userServiceImpl.userRepo.Save(user)
+	if saveErr := userServiceImpl.userRepo.Save(user); saveErr != nil {
+		return saveErr
+	}
+
+	return nil
 }
 
 func (userServiceImpl *userServiceImpl) Login(username, password string) (string, error) {

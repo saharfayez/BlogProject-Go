@@ -18,13 +18,11 @@ func NewUserRepository(db *gorm.DB) users.UserRepository {
 func (userRepo *userRepositoryImpl) FindUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	err := userRepo.db.Where("username = ?", username).First(&user).Error
-	if err != nil {
-		return nil, errors.Wrap(err, "user not found")
-	}
-	return &user, nil
+	return &user, errors.Wrap(err, "find user by username failed")
 }
 
 func (userRepo *userRepositoryImpl) Save(user *models.User) error {
 	// gorm documentation mentions that parameter to create method should be pointer
-	return userRepo.db.Create(&user).Error
+	err := userRepo.db.Create(&user).Error
+	return errors.Wrap(err, "create user failed")
 }

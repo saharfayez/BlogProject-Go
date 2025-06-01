@@ -32,7 +32,7 @@ func GenerateJWT(username string) (string, error) {
 }
 
 func GetTokenFromContext(c echo.Context) string {
-	token := c.Get("user ").(*jwt.Token)
+	token := c.Get("user").(*jwt.Token)
 	claims := token.Claims.(*Claims)
 	return claims.Username
 }
