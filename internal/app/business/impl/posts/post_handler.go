@@ -9,7 +9,9 @@ import (
 )
 
 func CreatePost(c echo.Context) error {
-	username := middleware.GetTokenFromContext(c)
+
+	claims := middleware.GetClaimsFromToken(c)
+	username := middleware.GetUsernameFromClaims(claims)
 
 	var post models.Post
 	if err := c.Bind(&post); err != nil {

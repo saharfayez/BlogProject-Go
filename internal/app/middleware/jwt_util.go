@@ -31,8 +31,12 @@ func GenerateJWT(username string) (string, error) {
 	return token.SignedString(JwtSecret)
 }
 
-func GetTokenFromContext(c echo.Context) string {
-	token := c.Get("user").(*jwt.Token)
+func GetClaimsFromToken(c echo.Context) *Claims {
+	token := c.Get("token").(*jwt.Token)
 	claims := token.Claims.(*Claims)
+	return claims
+}
+
+func GetUsernameFromClaims(claims *Claims) string {
 	return claims.Username
 }

@@ -9,7 +9,7 @@ import (
 func JWTMiddleware() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
 		SigningKey: JwtSecret,
-		ContextKey: "user",
+		ContextKey: "token",
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return &Claims{}
 		},
