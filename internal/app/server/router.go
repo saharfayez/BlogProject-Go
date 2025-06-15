@@ -3,7 +3,6 @@ package server
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"go.uber.org/zap"
 	"goproject/internal/app/business/impl/posts"
 	"goproject/internal/app/business/impl/users"
 	appMiddleware "goproject/internal/app/middleware"
@@ -13,8 +12,7 @@ func registerRoutes() *echo.Echo {
 	e := echo.New()
 
 	// zap
-	zapLogger, _ := zap.NewProduction()
-	e.Use(appMiddleware.ZapLoggerMiddleware(zapLogger))
+	e.Use(appMiddleware.ZapLoggerMiddleware())
 
 	// slog
 	//slogLogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))

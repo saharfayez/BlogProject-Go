@@ -3,6 +3,7 @@ package users
 import (
 	"github.com/pkg/errors"
 	"goproject/internal/app/business/interfaces/users"
+	appMiddleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
 	"gorm.io/gorm"
 )
@@ -18,6 +19,9 @@ func NewUserRepository(db *gorm.DB) users.UserRepository {
 func (userRepo *userRepositoryImpl) FindUserByUsername(username string) (*models.User, error) {
 	var user models.User
 	err := userRepo.db.Where("username = ?", username).First(&user).Error
+	appMiddleware.ZapLogger.Debug("debug in user repo")
+	appMiddleware.ZapLogger.Info("info in user repo")
+	appMiddleware.ZapLogger.Error("error in user repo")
 	return &user, errors.Wrap(err, "find user by username failed")
 }
 
