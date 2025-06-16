@@ -1,4 +1,3 @@
-// middlewares/logger.go
 package middlewares
 
 import (
@@ -25,7 +24,7 @@ func InitLogger(level zapcore.Level) {
 		atomicLevel,
 	)
 
-	ZapLogger = zap.New(core, zap.AddCaller())
+	ZapLogger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.DebugLevel))
 }
 
 //func SetLevel(level zapcore.Level) {

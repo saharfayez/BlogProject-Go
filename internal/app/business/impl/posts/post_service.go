@@ -3,6 +3,7 @@ package posts
 import (
 	"goproject/internal/app/business/interfaces/posts"
 	"goproject/internal/app/business/interfaces/users"
+	appMiddleware "goproject/internal/app/middleware"
 	"goproject/internal/app/models"
 )
 
@@ -17,6 +18,7 @@ func NewPostService(postRepo posts.PostRepository, userService users.UserService
 
 func (postServiceImpl *postServiceImpl) CreatePost(username string, post *models.Post) error {
 	user, err := postServiceImpl.userService.FindUser(username)
+	appMiddleware.ZapLogger.Info("logger in post service")
 	if err != nil {
 		return err
 	}

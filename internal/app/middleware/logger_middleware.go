@@ -47,6 +47,7 @@ func ZapLoggerMiddleware() echo.MiddlewareFunc {
 			_ = json.Unmarshal([]byte(responseBody), &rawJson)
 
 			if err != nil {
+
 				ZapLogger.Error("Request error",
 					zap.String("method", c.Request().Method),
 					zap.String("uri", c.Request().RequestURI),
